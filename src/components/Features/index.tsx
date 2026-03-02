@@ -31,7 +31,7 @@ const Features = () => {
         }}
         textAlign={"center"}
       >
-        Funcionalidades do Vendo.Sale
+        Funcionalidades do Loja.Sale
       </Heading>
 
       <Text
@@ -97,7 +97,7 @@ const Card = ({ icon, title, children }: CardProps) => (
   </Flex>
 );
 
-// Vendo.Sale Cards / Features
+// Loja.Sale Cards / Features
 const Cards = [
   {
     icon: LuLayoutTemplate,

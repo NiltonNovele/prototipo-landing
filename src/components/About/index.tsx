@@ -47,7 +47,7 @@ const About = () => {
     >
       {/* Título */}
       <Heading fontSize={{ base: 32, md: 48 }} textAlign="center">
-        Sobre a Vendo.Sale
+        Sobre a Loja.Sale
       </Heading>
 
       {/* Descrição resumida */}
@@ -57,7 +57,7 @@ const About = () => {
         maxW={800}
         color={StargateColors.grey}
       >
-        A Vendo.Sale permite que qualquer negócio crie a sua presença digital rapidamente,
+        A Loja.Sale permite que qualquer negócio crie a sua presença digital rapidamente,
         usando templates e protótipos prontos para lojas de moda, eletrónica, farmácias, padarias, restaurantes, artesãos e muito mais,
         sem precisar de programador.
       </Text>

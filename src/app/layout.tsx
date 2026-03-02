@@ -15,7 +15,7 @@ interface LayoutProps {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#2563EB", // Azul moderno Vendo.Sale
+  themeColor: "#2563EB", // Azul moderno Loja.Sale
   colorScheme: "light",
   initialScale: 1,
   width: "device-width",
@@ -23,19 +23,19 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    template: "Vendo.Sale | %s",
-    default: "Vendo.Sale",
+    template: "Loja.Sale | %s",
+    default: "Loja.Sale",
   },
   description:
-    "Vendo.Sale é uma plataforma desenvolvida pela SyncTechX que permite a qualquer negócio criar a sua loja online de forma simples, rápida e profissional. Ideal para lojas, restaurantes, padarias e empreendedores em Moçambique.",
+    "Loja.Sale é uma plataforma desenvolvida pela SyncTechX que permite a qualquer negócio criar a sua loja online de forma simples, rápida e profissional. Ideal para lojas, restaurantes, padarias e empreendedores em Moçambique.",
   icons: [{ rel: "icon", url: favicon.src }],
-  metadataBase: new URL("https://vendosale.com/"),
+  metadataBase: new URL("https://Loja.sale/"),
   openGraph: {
-    title: "Vendo.Sale | Digitalize o seu Negócio",
-    siteName: "Vendo.Sale",
+    title: "Loja.Sale | Digitalize o seu Negócio",
+    siteName: "Loja.Sale",
     description:
-      "Crie a sua loja online com a Vendo.Sale. Plataforma desenvolvida pela SyncTechX para ajudar negócios locais a vender online com facilidade.",
-    url: "https://vendosale.com/",
+      "Crie a sua loja online com a Loja.Sale. Plataforma desenvolvida pela SyncTechX para ajudar negócios locais a vender online com facilidade.",
+    url: "https://Loja.sale/",
     type: "website",
     locale: "pt_PT",
     images: [
@@ -43,12 +43,12 @@ export const metadata: Metadata = {
         url: SummaryLargeImage.src,
         width: SummaryLargeImage.width,
         height: SummaryLargeImage.height,
-        alt: "Vendo.Sale - Plataforma de Lojas Online",
+        alt: "Loja.Sale - Plataforma de Lojas Online",
       },
     ],
   },
   twitter: {
-    title: "Vendo.Sale | Digitalize o seu Negócio",
+    title: "Loja.Sale | Digitalize o seu Negócio",
     description:
       "Plataforma de criação de lojas online desenvolvida pela SyncTechX. Venda os seus produtos online de forma simples e profissional.",
     card: "summary_large_image",
@@ -57,12 +57,12 @@ export const metadata: Metadata = {
         url: SummaryLargeImage.src,
         width: SummaryLargeImage.width,
         height: SummaryLargeImage.height,
-        alt: "Vendo.Sale - Plataforma de Lojas Online",
+        alt: "Loja.Sale - Plataforma de Lojas Online",
       },
     ],
   },
   alternates: {
-    canonical: "https://vendosale.com/",
+    canonical: "https://Loja.sale/",
   },
 };
 

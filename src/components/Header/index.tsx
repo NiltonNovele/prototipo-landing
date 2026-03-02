@@ -97,7 +97,7 @@ const Header = () => {
         mt={5}
         fontSize={{ base: 16, md: 20 }}
       >
-        Vendo.Sale oferece uma ampla variedade de templates e protótipos
+        Loja.Sale oferece uma ampla variedade de templates e protótipos
         para qualquer negócio que queira estar online de forma rápida, eficiente
         e sem custos de desenvolvimento.
       </Text>

@@ -7,22 +7,30 @@ import {
   Icon,
   Stack,
   Text,
+  Box,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { LuCheck } from "react-icons/lu";
 
-const primaryColor = "#2563EB"; // Azul moderno
+const primaryColor = "#2563EB";
 const darkColor = "#0F172A";
 const borderColor = "#E2E8F0";
 const greyColor = "#64748B";
 
+const MotionFlex = motion(Flex);
+
 const Pricing = () => {
-  const [currentBilling, setCurrentBilling] = useState("mensal");
+  const [currentBilling, setCurrentBilling] = useState<
+    "mensal" | "anual"
+  >("mensal");
 
   const plans = [
     {
       name: "Individual",
+      popular: true,
+      bestFor:
+        "Ideal para empreendedores e pequenos/médios negócios que procuram uma solução digital eficiente e acessível.",
       price: currentBilling === "mensal" ? "1 500 MZN" : "15 000 MZN",
       features: [
         "Loja online pronta a usar",
@@ -34,7 +42,8 @@ const Pricing = () => {
     },
     {
       name: "Business",
-      popular: true,
+      bestFor:
+        "Perfeito para negócios em crescimento que precisam de controlo e relatórios avançados.",
       price: currentBilling === "mensal" ? "3 500 MZN" : "35 000 MZN",
       features: [
         "Tudo do plano Individual",
@@ -46,6 +55,8 @@ const Pricing = () => {
     },
     {
       name: "Ultimate",
+      bestFor:
+        "Solução completa para empresas estabelecidas que pretendem máxima personalização e suporte dedicado.",
       price: currentBilling === "mensal" ? "9 500 MZN" : "95 000 MZN",
       features: [
         "Tudo do plano Business",
@@ -71,43 +82,56 @@ const Pricing = () => {
         Escolha o plano ideal para o seu negócio
       </Heading>
 
-      <Text textAlign="center" color={greyColor} mb={8}>
-        Digitalize a sua loja com a Vendo.Sale e comece a vender online hoje.
+      <Text textAlign="center" color={greyColor} mb={8} maxW={600}>
+        Digitalize a sua loja com a Loja.Sale e comece a vender online
+        de forma simples, rápida e profissional.
       </Text>
 
       {/* Toggle */}
       <Flex
-        mb={10}
+        mb={12}
         gap={2}
         p={2}
-        borderRadius={16}
+        borderRadius="full"
         border={`1px solid ${borderColor}`}
       >
         {["mensal", "anual"].map((type) => (
           <Flex
             key={type}
             cursor="pointer"
-            onClick={() => setCurrentBilling(type)}
-            px={5}
+            onClick={() =>
+              setCurrentBilling(type as "mensal" | "anual")
+            }
+            px={6}
             py={2}
-            borderRadius={12}
+            borderRadius="full"
             bg={currentBilling === type ? darkColor : "transparent"}
-            transition="all 0.25s ease"
+            transition="all 0.3s ease"
             align="center"
             gap={2}
           >
             <Text
-              fontWeight="bold"
+              fontWeight="600"
               fontSize="sm"
-              color={currentBilling === type ? "white" : greyColor}
+              color={
+                currentBilling === type ? "white" : greyColor
+              }
             >
               {type === "mensal" ? "Mensal" : "Anual"}
             </Text>
 
             {type === "anual" && (
               <Badge
-                bg={currentBilling === "anual" ? "white" : primaryColor}
-                color={currentBilling === "anual" ? darkColor : "white"}
+                bg={
+                  currentBilling === "anual"
+                    ? "white"
+                    : primaryColor
+                }
+                color={
+                  currentBilling === "anual"
+                    ? darkColor
+                    : "white"
+                }
                 borderRadius="full"
                 fontSize="xs"
               >
@@ -126,26 +150,27 @@ const Pricing = () => {
       >
         <AnimatePresence mode="wait">
           {plans.map((plan) => (
-            <Flex
-              as={motion.div}
+            <MotionFlex
               key={`${plan.name}-${currentBilling}`}
               direction="column"
               p={8}
-              borderRadius={24}
+              borderRadius={28}
               border={`1px solid ${
                 plan.popular ? primaryColor : borderColor
               }`}
+              bg={plan.popular ? "white" : "white"}
               boxShadow={
                 plan.popular
-                  ? "0px 10px 40px rgba(37, 99, 235, 0.15)"
-                  : "none"
+                  ? "0px 15px 50px rgba(37, 99, 235, 0.2)"
+                  : "0px 8px 30px rgba(0,0,0,0.05)"
               }
+              whileHover={{ y: -8 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
               w="100%"
               position="relative"
-              initial={{ opacity: 0.2 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0.2 }}
-              // transition={{ duration: 0.25 }}
             >
               {plan.popular && (
                 <Badge
@@ -165,7 +190,7 @@ const Pricing = () => {
                 fontSize="sm"
                 textAlign="center"
                 color={greyColor}
-                mb={3}
+                mb={2}
               >
                 {plan.name}
               </Text>
@@ -183,12 +208,24 @@ const Pricing = () => {
                 textAlign="center"
                 fontSize="sm"
                 color={greyColor}
-                mb={6}
+                mb={4}
               >
                 {currentBilling === "mensal"
                   ? "por mês"
                   : "por ano"}
               </Text>
+
+              {/* Best For */}
+              <Box
+                bg="gray.50"
+                p={4}
+                borderRadius="xl"
+                mb={6}
+              >
+                <Text fontSize="sm" color={greyColor}>
+                  {plan.bestFor}
+                </Text>
+              </Box>
 
               <Stack spacing={4} mb={8}>
                 {plan.features.map((feature) => (
@@ -208,12 +245,13 @@ const Pricing = () => {
                 mt="auto"
                 bg={plan.popular ? primaryColor : darkColor}
                 color="white"
-                _hover={{ opacity: 0.85 }}
+                size="lg"
                 borderRadius="xl"
+                _hover={{ opacity: 0.9 }}
               >
                 Começar Agora
               </Button>
-            </Flex>
+            </MotionFlex>
           ))}
         </AnimatePresence>
       </Stack>

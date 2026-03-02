@@ -59,7 +59,7 @@ const Footer = () => {
             rounded="full"
             mr={2}
           >
-            Vendo.Sale
+            Loja.Sale
           </Text>
           Protótipos Para o Teu Tipo de Negócio
         </Text>
@@ -188,7 +188,7 @@ const Footer = () => {
         justify="center"
       >
         <Text color={StargateColors.white} fontSize="sm" textAlign="center">
-          &copy; {new Date().getFullYear()} Vendo.Sale - Todos os direitos reservados
+          &copy; {new Date().getFullYear()} Loja.Sale - Todos os direitos reservados
         </Text>
         <Text color={StargateColors.white} fontSize="sm" textAlign="center">
           Desenvolvido por SyncTechX

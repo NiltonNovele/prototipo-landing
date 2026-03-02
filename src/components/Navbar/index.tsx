@@ -89,7 +89,7 @@ const Navbar: FC = () => {
             userSelect="none"
             color={isScrolled ? "black" : "white"}
           >
-            Vendo.sale
+            Loja.sale
           </Text>
 
           {/* Links desktop */}
@@ -124,9 +124,9 @@ const Navbar: FC = () => {
 
           {/* Botões desktop */}
           <Flex gap={4} display={{ base: "none", lg: "flex" }}>
-            <Button variant="link" color={isScrolled ? "black" : "white"}>
+            {/* <Button variant="link" color={isScrolled ? "black" : "white"}>
               Entrar
-            </Button>
+            </Button> */}
             <Button
               as={motion.a}
               whileHover={{ scale: 1.05 }}
@@ -137,7 +137,7 @@ const Navbar: FC = () => {
               _hover={{ bg: isScrolled ? StargateColors.primary : "white" }}
               px={6}
             >
-              Comece grátis
+              Comece agora
             </Button>
           </Flex>
 
@@ -177,9 +177,9 @@ const Navbar: FC = () => {
               </Link>
             ))}
             <Flex gap={4} mt={3} direction="column">
-              <Button variant="link" color={isScrolled ? "black" : "white"}>
+              {/* <Button variant="link" color={isScrolled ? "black" : "white"}>
                 Entrar
-              </Button>
+              </Button> */}
               <Button
                 as={motion.a}
                 whileHover={{ scale: 1.05 }}
@@ -188,7 +188,7 @@ const Navbar: FC = () => {
                 background={isScrolled ? StargateColors.primary : "white"}
                 color={isScrolled ? "white" : "black"}
               >
-                Comece grátis
+                Comece agora
               </Button>
             </Flex>
           </Flex>

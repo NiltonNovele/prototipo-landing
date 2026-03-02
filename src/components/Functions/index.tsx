@@ -1,6 +1,13 @@
 "use client";
 import { StargateColors } from "#/src/utils/Colors";
-import { Flex, Grid, GridItem, Heading, Text, Box } from "@chakra-ui/react";
+import {
+  Flex,
+  Grid,
+  GridItem,
+  Heading,
+  Text,
+  Box,
+} from "@chakra-ui/react";
 import React from "react";
 
 interface Prototype {
@@ -18,7 +25,8 @@ const prototypes: Prototype[] = [
     id: 1,
     type: "Cafeteria",
     description: "Loja moderna para cafés, padarias e pastelarias.",
-    media: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXZuZTFwYXloMXJnaHo0MjB4NTVqbmZjNno1bWZlY2didzVybGt1OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ehwuBgKNA2NACoFa7w/giphy.gif",
+    media:
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXZuZTFwYXloMXJnaHo0MjB4NTVqbmZjNno1bWZlY2didzVybGt1OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ehwuBgKNA2NACoFa7w/giphy.gif",
     href: "/prototypes/cafeteria",
     colSpan: 2,
     rowSpan: 1,
@@ -35,7 +43,8 @@ const prototypes: Prototype[] = [
   {
     id: 3,
     type: "Produtos",
-    description: "Venda de produtos diversos com gestão avançada de stock.",
+    description:
+      "Venda de produtos diversos com gestão avançada de stock.",
     media: "https://media.giphy.com/media/xT9IgG50Fb7Mi0prBC/giphy.gif",
     href: "/prototypes/produtos",
     colSpan: 1,
@@ -78,10 +87,21 @@ const PrototypesGrid = () => {
       justify="center"
       align="center"
       my={24}
-      px={2}
+      px={4}
       maxW={1200}
       mx="auto"
     >
+      {/* Title */}
+      <Heading
+        mb={12}
+        textAlign="center"
+        fontSize={{ base: "24px", md: "36px" }}
+        fontWeight="bold"
+        color={StargateColors?.black || "gray.800"}
+      >
+        Escolha o protótipo ideal para o seu ofício
+      </Heading>
+
       <Grid
         templateRows="repeat(3, 1fr)"
         templateColumns={{ base: "repeat(2, 1fr)", md: "repeat(3, 1fr)" }}
@@ -114,7 +134,7 @@ const PrototypesGrid = () => {
               transition="all 0.3s ease"
             />
 
-            {/* Overlay Type and Description */}
+            {/* Overlay Content */}
             <Flex
               position="absolute"
               top="50%"

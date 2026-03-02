@@ -10,6 +10,7 @@ export default function Home() {
   return (
     <main>
       <Header />
+      <Functions />
       <About />
       <Features />
       <Functions />

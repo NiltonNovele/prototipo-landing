@@ -38,7 +38,7 @@ const Product = () => {
       borderRadius={24}
     >
       <Heading textAlign="center" px={2}>
-        O que pode a Vendo.Sale fazer pelo seu negócio?
+        O que pode a Loja.Sale fazer pelo seu negócio?
       </Heading>
 
       {/* Category Tabs */}

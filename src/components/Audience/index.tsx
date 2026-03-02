@@ -28,7 +28,7 @@ const Audience = () => {
           bgClip="text"
           fontWeight="bold"
         >
-          Vendo.Sale
+          Loja.Sale
         </Text>{" "}
         é ideal para
       </Heading>
