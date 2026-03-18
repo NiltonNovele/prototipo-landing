@@ -106,7 +106,7 @@ const Header = () => {
       <Button
         leftIcon={<LuZap />}
         as={motion.a}
-        href={"#features"}
+        href={"/form"}
         whileHover={{ scale: 1.1 }}
         size={"lg"}
         mt={5}

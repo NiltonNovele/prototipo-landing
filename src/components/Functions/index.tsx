@@ -14,8 +14,8 @@ interface Prototype {
   id: number;
   type: string;
   description: string;
-  media: string; // GIF or video URL
-  href: string; // link to prototype detail page
+  media: string;
+  href: string;
   colSpan?: number;
   rowSpan?: number | object;
 }
@@ -72,7 +72,7 @@ const prototypes: Prototype[] = [
     id: 6,
     type: "Serviços",
     description: "Apresentação de serviços e agendamentos online.",
-    media: "https://media.giphy.com/media/xT0xeJpnrWC4XWblEk/giphy.gif",
+    media: "/1.png",
     href: "/prototypes/servicos",
     colSpan: 2,
     rowSpan: 1,
@@ -91,7 +91,6 @@ const PrototypesGrid = () => {
       maxW={1200}
       mx="auto"
     >
-      {/* Title */}
       <Heading
         mb={12}
         textAlign="center"
@@ -99,7 +98,7 @@ const PrototypesGrid = () => {
         fontWeight="bold"
         color={StargateColors?.black || "gray.800"}
       >
-        Escolha o protótipo ideal para o seu ofício
+        Escolha o protótipo ideal para o seu ofício...
       </Heading>
 
       <Grid
@@ -122,7 +121,7 @@ const PrototypesGrid = () => {
             onClick={() => (window.location.href = proto.href)}
             minH={{ base: "180px", md: "320px" }}
           >
-            {/* GIF Background */}
+            {/* Background Image */}
             <Box
               as="img"
               src={proto.media}
@@ -130,8 +129,16 @@ const PrototypesGrid = () => {
               w="100%"
               h="100%"
               objectFit="cover"
-              filter="brightness(0.45)"
-              transition="all 0.3s ease"
+            />
+
+            {/* Dark Gradient Overlay (ensures text visibility) */}
+            <Box
+              position="absolute"
+              top="0"
+              left="0"
+              w="100%"
+              h="100%"
+              bg="linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0.65))"
             />
 
             {/* Overlay Content */}
@@ -144,11 +151,13 @@ const PrototypesGrid = () => {
               align="center"
               textAlign="center"
               px={4}
+              zIndex={2}
             >
               <Heading
                 color="white"
                 fontSize={{ base: 16, md: 22 }}
                 mb={2}
+                textShadow="0 2px 8px rgba(0,0,0,0.8)"
               >
                 {proto.type}
               </Heading>
@@ -156,6 +165,7 @@ const PrototypesGrid = () => {
                 color="whiteAlpha.900"
                 fontSize={{ base: 12, md: 14 }}
                 maxW="200px"
+                textShadow="0 2px 6px rgba(0,0,0,0.8)"
               >
                 {proto.description}
               </Text>

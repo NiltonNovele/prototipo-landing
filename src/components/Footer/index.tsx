@@ -160,7 +160,7 @@ const Footer = () => {
                   {index === 2 && (
                     <Button
                       as={motion.a}
-                      href="#product"
+                      href="/form"
                       rightIcon={<LuArrowRight />}
                       bg={StargateColors.primary}
                       color="white"

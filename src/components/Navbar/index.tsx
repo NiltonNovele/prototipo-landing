@@ -130,7 +130,7 @@ const Navbar: FC = () => {
             <Button
               as={motion.a}
               whileHover={{ scale: 1.05 }}
-              href="#footer"
+              href="/form"
               rounded="full"
               background={isScrolled ? StargateColors.primary : "white"}
               color={isScrolled ? "white" : "black"}
@@ -183,7 +183,7 @@ const Navbar: FC = () => {
               <Button
                 as={motion.a}
                 whileHover={{ scale: 1.05 }}
-                href="#footer"
+                href="/form"
                 rounded="full"
                 background={isScrolled ? StargateColors.primary : "white"}
                 color={isScrolled ? "white" : "black"}
