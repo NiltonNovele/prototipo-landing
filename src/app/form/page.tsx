@@ -30,6 +30,7 @@ import {
   LayoutTemplate,
   Globe,
   ShieldCheck,
+  Info,
 } from "lucide-react";
 
 const primaryColor = "#2563EB";
@@ -37,15 +38,16 @@ const darkColor = "#0F172A";
 const greyColor = "#64748B";
 const borderColor = "#E2E8F0";
 
-const Section = ({
-  icon,
-  title,
-  children,
-}: {
-  icon: any;
-  title: string;
-  children: React.ReactNode;
-}) => (
+const inputStyle = {
+  bg: "gray.50",
+  border: "1px solid #E2E8F0",
+  _focus: {
+    borderColor: primaryColor,
+    boxShadow: `0 0 0 1px ${primaryColor}`,
+  },
+};
+
+const Section = ({ icon, title, children }: any) => (
   <Box
     border={`1px solid ${borderColor}`}
     borderRadius="2xl"
@@ -63,6 +65,12 @@ const Section = ({
   </Box>
 );
 
+const Label = ({ children }: any) => (
+  <Text fontSize="sm" fontWeight="600">
+    {children}
+  </Text>
+);
+
 const QuestionnairePage = () => {
   const [form, setForm] = useState<any>({});
   const [selectedPlan, setSelectedPlan] = useState("Individual");
@@ -76,29 +84,17 @@ const QuestionnairePage = () => {
       name: "Individual",
       price: "1 500 MZN",
       popular: true,
-      features: [
-        "Loja pronta",
-        "Produtos ilimitados",
-        "Checkout incluído",
-      ],
+      features: ["Loja pronta", "Produtos ilimitados", "Checkout incluído"],
     },
     {
       name: "Business",
       price: "3 500 MZN",
-      features: [
-        "Stock avançado",
-        "Promoções",
-        "Relatórios",
-      ],
+      features: ["Stock avançado", "Promoções", "Relatórios"],
     },
     {
       name: "Ultimate",
       price: "9 500 MZN",
-      features: [
-        "Domínio incluído",
-        "Pagamentos locais",
-        "Suporte dedicado",
-      ],
+      features: ["Domínio incluído", "Pagamentos locais", "Suporte dedicado"],
     },
   ];
 
@@ -109,34 +105,42 @@ const QuestionnairePage = () => {
         {/* Header */}
         <Box textAlign="center">
           <Heading mb={3}>Criação de Loja Online</Heading>
-          <Text color={greyColor}>
-            Preencha com o máximo de detalhe possível. Isto permite-nos criar
-            uma loja completa, funcional e pronta para vender.
+          <Text color={greyColor} maxW={600} mx="auto">
+            Quanto mais detalhes fornecer, melhor conseguimos personalizar a sua loja.
           </Text>
         </Box>
 
-        {/* Loja */}
+        {/* Identificação */}
         <Section icon={Store} title="Identificação da Loja">
           <Stack spacing={4}>
-            <Input placeholder="Nome da Loja" onChange={(e)=>handleChange("nome",e.target.value)} />
-            
-            <CheckboxGroup onChange={(v)=>handleChange("tipoNegocio",v)}>
-              <Grid templateColumns="repeat(2,1fr)">
-                <Checkbox value="eletronicos">Eletrônicos</Checkbox>
-                <Checkbox value="moda">Roupa / Moda</Checkbox>
-                <Checkbox value="farmacia">Farmácia</Checkbox>
-                <Checkbox value="padaria">Padaria</Checkbox>
-                <Checkbox value="cosmeticos">Cosméticos</Checkbox>
-                <Checkbox value="supermercado">Supermercado</Checkbox>
-              </Grid>
-            </CheckboxGroup>
+            <Box>
+              <Label>Nome da Loja</Label>
+              <Input {...inputStyle} onChange={(e)=>handleChange("nome",e.target.value)} />
+            </Box>
 
-            <Select placeholder="Possui loja física?" onChange={(e)=>handleChange("fisica",e.target.value)}>
-              <option value="sim">Sim</option>
-              <option value="nao">Não</option>
-            </Select>
+            <Box>
+              <Label>Tipo de Negócio</Label>
+              <CheckboxGroup onChange={(v)=>handleChange("tipo",v)}>
+                <Grid templateColumns="repeat(2,1fr)">
+                  <Checkbox value="moda">Moda</Checkbox>
+                  <Checkbox value="eletronicos">Eletrónica</Checkbox>
+                  <Checkbox value="farmacia">Farmácia</Checkbox>
+                  <Checkbox value="padaria">Padaria</Checkbox>
+                  <Checkbox value="cosmeticos">Cosméticos</Checkbox>
+                  <Checkbox value="outro">Outro</Checkbox>
+                </Grid>
+              </CheckboxGroup>
+            </Box>
 
-            <Input placeholder="Cidade / Área" onChange={(e)=>handleChange("cidade",e.target.value)} />
+            <Grid templateColumns="1fr 1fr" gap={4}>
+              <Select {...inputStyle} onChange={(e)=>handleChange("fisica",e.target.value)}>
+                <option value="">Loja física?</option>
+                <option value="sim">Sim</option>
+                <option value="nao">Não</option>
+              </Select>
+
+              <Input placeholder="Cidade" {...inputStyle} onChange={(e)=>handleChange("cidade",e.target.value)} />
+            </Grid>
           </Stack>
         </Section>
 
@@ -149,70 +153,52 @@ const QuestionnairePage = () => {
                 <Checkbox value="preto">Preto & Dourado</Checkbox>
                 <Checkbox value="vermelho">Vermelho</Checkbox>
                 <Checkbox value="verde">Verde</Checkbox>
-                <Checkbox value="rosa">Rosa</Checkbox>
                 <Checkbox value="minimal">Minimalista</Checkbox>
               </Grid>
             </CheckboxGroup>
 
-            <Select onChange={(e)=>handleChange("branding",e.target.value)}>
-              <option value="">Já tem identidade?</option>
-              <option value="sim">Sim</option>
-              <option value="nao">Não</option>
-            </Select>
+            <Input placeholder="Link do logotipo" {...inputStyle} />
+            <Input placeholder="Instagram / Site" {...inputStyle} />
 
-            <Input placeholder="Link do logotipo (Drive/WhatsApp)" onChange={(e)=>handleChange("logo",e.target.value)} />
-            <Input placeholder="Instagram ou site atual" onChange={(e)=>handleChange("social",e.target.value)} />
+            <Textarea
+              placeholder="Descreva o estilo da sua marca"
+              {...inputStyle}
+            />
           </Stack>
-        </Section>
-
-        {/* Objetivo */}
-        <Section icon={Target} title="Objetivo da Loja">
-          <CheckboxGroup onChange={(v)=>handleChange("objetivo",v)}>
-            <Stack>
-              <Checkbox value="vendas">Vender online</Checkbox>
-              <Checkbox value="whatsapp">Pedidos via WhatsApp</Checkbox>
-              <Checkbox value="catalogo">Mostrar catálogo</Checkbox>
-              <Checkbox value="delivery">Delivery</Checkbox>
-            </Stack>
-          </CheckboxGroup>
         </Section>
 
         {/* Produtos */}
         <Section icon={Package} title="Produtos">
           <Stack spacing={4}>
-            <Select onChange={(e)=>handleChange("quantidade",e.target.value)}>
-              <option value="">Quantidade de produtos</option>
+            <Input placeholder="Principais produtos" {...inputStyle} />
+
+            <Select {...inputStyle}>
+              <option>Quantidade de produtos</option>
               <option>1–20</option>
               <option>20–50</option>
               <option>50–100</option>
               <option>100+</option>
             </Select>
 
-            <CheckboxGroup onChange={(v)=>handleChange("variacoes",v)}>
+            <CheckboxGroup>
               <Stack direction="row">
-                <Checkbox value="tamanho">Tamanho</Checkbox>
-                <Checkbox value="cor">Cor</Checkbox>
-                <Checkbox value="modelo">Modelo</Checkbox>
+                <Checkbox>Tamanho</Checkbox>
+                <Checkbox>Cor</Checkbox>
+                <Checkbox>Modelo</Checkbox>
               </Stack>
             </CheckboxGroup>
-
-            <Select onChange={(e)=>handleChange("fotos",e.target.value)}>
-              <option value="">Fotos dos produtos</option>
-              <option value="sim">Já tenho</option>
-              <option value="nao">Preciso de ajuda</option>
-            </Select>
           </Stack>
         </Section>
 
         {/* Pagamentos */}
         <Section icon={CreditCard} title="Pagamentos">
-          <CheckboxGroup onChange={(v)=>handleChange("pagamentos",v)}>
+          <CheckboxGroup>
             <Grid templateColumns="repeat(2,1fr)">
-              <Checkbox value="mpesa">M-Pesa</Checkbox>
-              <Checkbox value="emola">e-Mola</Checkbox>
-              <Checkbox value="mkesh">mKesh</Checkbox>
-              <Checkbox value="cartao">Cartão</Checkbox>
-              <Checkbox value="entrega">Pagamento na entrega</Checkbox>
+              <Checkbox>M-Pesa</Checkbox>
+              <Checkbox>e-Mola</Checkbox>
+              <Checkbox>mKesh</Checkbox>
+              <Checkbox>EFT</Checkbox>
+              <Checkbox>Cash on Delivery</Checkbox>
             </Grid>
           </CheckboxGroup>
         </Section>
@@ -220,18 +206,18 @@ const QuestionnairePage = () => {
         {/* Entregas */}
         <Section icon={Truck} title="Entregas">
           <Stack spacing={4}>
-            <CheckboxGroup onChange={(v)=>handleChange("entrega",v)}>
+            <CheckboxGroup>
               <Stack>
-                <Checkbox value="retirada">Retirada</Checkbox>
-                <Checkbox value="delivery">Delivery próprio</Checkbox>
-                <Checkbox value="motoboy">Motoboy</Checkbox>
+                <Checkbox>Retirada</Checkbox>
+                <Checkbox>Delivery</Checkbox>
+                <Checkbox>Motoboy</Checkbox>
               </Stack>
             </CheckboxGroup>
 
-            <Select onChange={(e)=>handleChange("taxa",e.target.value)}>
-              <option value="">Cobra taxa?</option>
-              <option value="sim">Sim</option>
-              <option value="nao">Não</option>
+            <Select {...inputStyle}>
+              <option>Cobra taxa?</option>
+              <option>Sim</option>
+              <option>Não</option>
             </Select>
           </Stack>
         </Section>
@@ -239,84 +225,104 @@ const QuestionnairePage = () => {
         {/* Comunicação */}
         <Section icon={MessageCircle} title="Comunicação">
           <Stack spacing={4}>
-            <Select onChange={(e)=>handleChange("pedidos",e.target.value)}>
-              <option value="">Receber pedidos via</option>
-              <option value="whatsapp">WhatsApp</option>
-              <option value="checkout">Checkout automático</option>
-              <option value="ambos">Ambos</option>
+            <Input placeholder="WhatsApp" {...inputStyle} />
+            <Select {...inputStyle}>
+              <option>Receber pedidos via</option>
+              <option>WhatsApp</option>
+              <option>Checkout</option>
+              <option>Ambos</option>
             </Select>
-
-            <Input placeholder="WhatsApp" onChange={(e)=>handleChange("telefone",e.target.value)} />
           </Stack>
-        </Section>
-
-        {/* Funcionalidades */}
-        <Section icon={Settings} title="Funcionalidades Extras">
-          <CheckboxGroup onChange={(v)=>handleChange("extras",v)}>
-            <Stack>
-              <Checkbox value="cupons">Cupões</Checkbox>
-              <Checkbox value="promocoes">Promoções</Checkbox>
-              <Checkbox value="stock">Controle de stock</Checkbox>
-              <Checkbox value="relatorios">Relatórios</Checkbox>
-            </Stack>
-          </CheckboxGroup>
         </Section>
 
         {/* Técnico */}
         <Section icon={Globe} title="Configuração Técnica">
           <Stack spacing={4}>
-            <Select onChange={(e)=>handleChange("dominio",e.target.value)}>
-              <option value="">Domínio</option>
-              <option value="sim">Já tenho domínio</option>
-              <option value="nao">Preciso de domínio</option>
+            <Select {...inputStyle}>
+              <option>Domínio</option>
+              <option>Já tenho</option>
+              <option>Preciso de ajuda</option>
             </Select>
 
-            <Input placeholder="Nome desejado do domínio" onChange={(e)=>handleChange("dominioNome",e.target.value)} />
+            <Input placeholder="Nome do domínio desejado" {...inputStyle} />
           </Stack>
         </Section>
 
         {/* Legal */}
         <Section icon={ShieldCheck} title="Informação Legal">
           <Stack spacing={4}>
-            <Input placeholder="Nome da empresa (opcional)" onChange={(e)=>handleChange("empresa",e.target.value)} />
-            <Input placeholder="NUIT (opcional)" onChange={(e)=>handleChange("nuit",e.target.value)} />
+            <Input placeholder="Nome da empresa" {...inputStyle} />
+            <Input placeholder="NUIT" {...inputStyle} />
           </Stack>
         </Section>
 
-        {/* Data */}
+        {/* Lançamento */}
         <Section icon={Calendar} title="Lançamento">
           <Stack spacing={3}>
-            <Input type="date" onChange={(e)=>handleChange("data",e.target.value)} />
-            <Text fontSize="sm" color={greyColor}>
-              Tempo médio de entrega: 2–3 dias após envio completo.
-            </Text>
+            <Input type="date" {...inputStyle} />
+            <Flex align="center" gap={2}>
+              <Icon as={Info} />
+              <Text fontSize="sm" color={greyColor}>
+                Levamos 2–3 dias para personalizar a sua loja.
+              </Text>
+            </Flex>
           </Stack>
         </Section>
 
         {/* Planos */}
-        <Section icon={LayoutTemplate} title="Plano">
+        <Section icon={LayoutTemplate} title="Escolha o Plano">
           <Grid templateColumns={{ base: "1fr", md: "1fr 1fr 1fr" }} gap={6}>
             {plans.map((plan) => (
               <Box
                 key={plan.name}
-                border={`1px solid ${selectedPlan === plan.name ? primaryColor : borderColor}`}
-                p={5}
+                border={`1px solid ${
+                  selectedPlan === plan.name ? primaryColor : borderColor
+                }`}
                 borderRadius="xl"
+                p={5}
                 cursor="pointer"
                 onClick={() => setSelectedPlan(plan.name)}
+                boxShadow={
+                  selectedPlan === plan.name
+                    ? "0px 10px 25px rgba(37,99,235,0.2)"
+                    : "none"
+                }
               >
-                {plan.popular && <Badge colorScheme="blue">Popular</Badge>}
+                {plan.popular && (
+                  <Badge colorScheme="blue" mb={2}>
+                    Popular
+                  </Badge>
+                )}
+
                 <Heading size="md">{plan.name}</Heading>
-                <Text fontWeight="bold">{plan.price}</Text>
+                <Text fontWeight="bold" my={2}>
+                  {plan.price}
+                </Text>
+
+                <Stack spacing={1}>
+                  {plan.features.map((f) => (
+                    <Text fontSize="sm" key={f}>
+                      • {f}
+                    </Text>
+                  ))}
+                </Stack>
               </Box>
             ))}
           </Grid>
         </Section>
 
-        <Button bg={primaryColor} color="white" size="lg">
-          Enviar
+        {/* Submit */}
+        <Button
+          bg={primaryColor}
+          color="white"
+          size="lg"
+          borderRadius="xl"
+          py={7}
+          _hover={{ opacity: 0.9 }}
+          boxShadow="0px 10px 25px rgba(37,99,235,0.3)"
+        >
+          Enviar Questionário
         </Button>
-
       </Flex>
     </Flex>
   );
