@@ -50,17 +50,17 @@ const primaryColor = "#2563EB";
 const prototypes: Prototype[] = [
   {
     id: 1,
-    type: "Cafeteria",
+    type: "Confeitaria",
     description:
-      "Loja moderna e envolvente para cafés, padarias e pastelarias, com foco em produtos frescos e encomendas rápidas.",
+      "Loja moderna e envolvente para lojas individuais, cafés, padarias e pastelarias, com foco em produtos frescos e encomendas rápidas.",
     media:
       "/4.png",
     colSpan: 2,
-    price: "A partir de 1 500 MZN",
+    price: "A partir de 3,000MZN",
     purpose:
       "Permitir que clientes façam encomendas rápidas de produtos frescos com opção de entrega ou recolha, aumentando vendas diárias.",
     details:
-      "Este template foi pensado especificamente para negócios de alimentação rápida como padarias, cafés e pastelarias. O design destaca produtos frescos, promoções do dia e especialidades, incentivando compras imediatas. A navegação é simples e intuitiva, ideal para clientes que querem fazer pedidos rápidos sem complicações. Também permite destacar produtos disponíveis por horário, como pão quente ou bolos do dia.",
+      "Este template foi pensado especificamente para negócios de alimentação rápida como confeitarias. O design destaca produtos frescos, promoções do dia e especialidades, incentivando compras imediatas. A navegação é simples e intuitiva, ideal para clientes que querem fazer pedidos rápidos sem complicações. Também permite destacar produtos disponíveis por horário, como pão quente ou bolos do dia.",
     focuses: [
       "Produtos frescos em destaque",
       "Encomendas rápidas e simples",
@@ -92,7 +92,7 @@ const prototypes: Prototype[] = [
     description:
       "Loja moderna e altamente otimizada para venda de gadgets, smartphones e produtos tecnológicos.",
     media: "/3.jpeg",
-    price: "A partir de 2 500 MZN",
+    price: "A partir de 3,000MZN",
     purpose:
       "Maximizar conversões e vendas de produtos tecnológicos através de uma experiência profissional e organizada.",
     details:
@@ -129,7 +129,7 @@ const prototypes: Prototype[] = [
       "Loja completa e escalável para venda de múltiplos tipos de produtos com gestão avançada.",
     media: "/5.jpeg",
     rowSpan: { base: 1, md: 2 },
-    price: "A partir de 3 500 MZN",
+    price: "A partir de 3,000MZN",
     purpose:
       "Oferecer uma solução robusta para negócios que vendem vários produtos e precisam de controlo total.",
     details:
@@ -164,7 +164,7 @@ const prototypes: Prototype[] = [
     description:
       "Loja elegante e moderna para marcas de roupa, acessórios e moda premium.",
     media: "/2.jpeg",
-    price: "A partir de 2 000 MZN",
+    price: "A partir de 3,000MZN",
     purpose:
       "Criar uma experiência visual premium que valoriza a marca e aumenta vendas de moda.",
     details:
@@ -194,39 +194,40 @@ const prototypes: Prototype[] = [
   },
 
   {
-    id: 5,
-    type: "Alimentação",
-    description:
-      "Loja online para venda de produtos alimentares com foco em entregas rápidas e organização.",
-    media: "https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif",
-    price: "A partir de 2 000 MZN",
-    purpose:
-      "Facilitar pedidos de alimentos com entrega eficiente e catálogo organizado.",
-    details:
-      "Este template é ideal para negócios alimentares que precisam de um sistema simples mas eficiente. Permite organizar produtos por categorias, destacar promoções e facilitar pedidos para entrega. A interface é clara e funcional, garantindo que o cliente encontre rapidamente o que procura.",
-    focuses: [
-      "Entrega eficiente",
-      "Organização de produtos",
-      "Facilidade de uso",
-      "Rapidez nos pedidos",
-    ],
-    features: [
-      "Carrinho de compras intuitivo",
-      "Categorias organizadas",
-      "Promoções e destaques",
-      "Integração com delivery",
-      "Checkout simples",
-    ],
-    howItWorks:
-      "Os clientes escolhem produtos, adicionam ao carrinho e finalizam o pedido para entrega ou recolha, com um processo simples e rápido.",
-    suitableFor: [
-      "Mercearias",
-      "Mini mercados",
-      "Lojas gourmet",
-      "Distribuidores de alimentos",
-    ],
-    demoLink: "/demo/alimentacao",
-  },
+  id: 5,
+  type: "Personalizado",
+  description:
+    "Crie uma loja totalmente à sua medida, com design e funcionalidades adaptadas exatamente ao seu negócio.",
+  media: "/6.jpg",
+  price: "A partir de 10,000MZN",
+  purpose:
+    "Permitir a criação de uma loja completamente personalizada, adaptada às necessidades específicas do seu negócio, sem limitações de estrutura ou funcionalidades.",
+  details:
+    "Este template não segue um modelo fixo — é uma solução totalmente personalizada. Ideal para quem quer algo único, diferente e alinhado com a sua visão. Desde o design até às funcionalidades, tudo pode ser ajustado para refletir a identidade da sua marca e os seus objetivos. Pode incluir funcionalidades específicas, integrações personalizadas e layouts exclusivos, garantindo uma experiência única para os seus clientes.",
+  focuses: [
+    "Personalização total",
+    "Flexibilidade máxima",
+    "Identidade única da marca",
+    "Escalabilidade sem limitações",
+  ],
+  features: [
+    "Design completamente personalizado",
+    "Funcionalidades feitas à medida",
+    "Integrações específicas conforme necessidade",
+    "Estrutura adaptada ao seu tipo de negócio",
+    "Possibilidade de evoluir e adicionar novas funcionalidades",
+  ],
+  howItWorks:
+    "Após entender as suas necessidades, criamos uma loja totalmente adaptada ao seu negócio. Desde o layout até às funcionalidades, tudo é construído com base nos seus objetivos. O resultado é uma plataforma única, pensada para maximizar resultados e oferecer a melhor experiência possível aos seus clientes.",
+  suitableFor: [
+    "Negócios com necessidades específicas",
+    "Marcas que querem destacar-se",
+    "Empresas em crescimento",
+    "Projetos inovadores",
+    "Qualquer tipo de negócio que precise de algo único",
+  ],
+  demoLink: "#",
+},
 
   {
     id: 6,
@@ -235,7 +236,7 @@ const prototypes: Prototype[] = [
       "Plataforma moderna para apresentação de serviços e agendamento online.",
     media: "/1.png",
     colSpan: 2,
-    price: "A partir de 1 500 MZN",
+    price: "A partir de 3,000MZN",
     purpose:
       "Permitir que clientes visualizem serviços e façam marcações de forma simples e rápida.",
     details:

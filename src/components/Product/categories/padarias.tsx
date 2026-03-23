@@ -16,7 +16,7 @@ const Padarias = () => {
       px={6}
     >
       <ProductCard icon={LuCakeSlice} title={"Padaria & Pastelaria Online"}>
-        Template ideal para apresentar pães, bolos e produtos frescos.
+        Template ideal para apresentar doces, bolos e outros produtos frescos.
         Layout apelativo com destaque para especialidades do dia.
       </ProductCard>
 

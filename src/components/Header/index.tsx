@@ -14,7 +14,7 @@ const words = [
   "Eletrónica",
   "Loja de Produtos",
   "Startups",
-  "Negócios Locais",
+  "PMEs",
 ];
 
 const Header = () => {

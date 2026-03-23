@@ -20,17 +20,15 @@ import React, { useState } from "react";
 import {
   Store,
   Palette,
-  Target,
   Package,
   CreditCard,
   Truck,
   MessageCircle,
-  Settings,
-  Calendar,
   LayoutTemplate,
   Globe,
   ShieldCheck,
   Info,
+  Calendar,
 } from "lucide-react";
 
 const primaryColor = "#2563EB";
@@ -73,30 +71,76 @@ const Label = ({ children }: any) => (
 
 const QuestionnairePage = () => {
   const [form, setForm] = useState<any>({});
-  const [selectedPlan, setSelectedPlan] = useState("Individual");
+  const [selectedPlan, setSelectedPlan] = useState("Starter");
+  const [selectedPrototype, setSelectedPrototype] = useState("");
 
   const handleChange = (key: string, value: any) => {
     setForm((prev: any) => ({ ...prev, [key]: value }));
   };
 
-  const plans = [
+  // 🔥 Dynamic category logic
+  const getProductOptions = () => {
+    const tipo = form.tipo || [];
+
+    if (tipo.includes("moda")) {
+      return ["Tamanho", "Cor", "Modelo", "Coleção", "Género"];
+    }
+
+    if (tipo.includes("eletronicos")) {
+      return ["Marca", "Modelo", "Capacidade", "Cor", "Versão"];
+    }
+
+    if (tipo.includes("farmacia")) {
+      return ["Categoria", "Dosagem", "Marca", "Tipo"];
+    }
+
+    if (tipo.includes("padaria") || tipo.includes("confeitaria")) {
+      return ["Tipo de produto", "Tamanho", "Sabor"];
+    }
+
+    return ["Categoria", "Tipo", "Marca"];
+  };
+
+  const prototypes = [
     {
-      name: "Individual",
-      price: "1 500 MZN",
-      popular: true,
-      features: ["Loja pronta", "Produtos ilimitados", "Checkout incluído"],
+      name: "Confeitaria",
+      desc: "Loja moderna e envolvente para cafés, padarias e pastelarias.",
     },
     {
-      name: "Business",
-      price: "3 500 MZN",
-      features: ["Stock avançado", "Promoções", "Relatórios"],
+      name: "Eletrónicos",
+      desc: "Venda de gadgets e tecnologia com alta conversão.",
     },
     {
-      name: "Ultimate",
-      price: "9 500 MZN",
-      features: ["Domínio incluído", "Pagamentos locais", "Suporte dedicado"],
+      name: "Produtos",
+      desc: "Loja completa com gestão avançada.",
+    },
+    {
+      name: "Moda",
+      desc: "Design elegante para marcas de roupa.",
+    },
+    {
+      name: "Personalizado",
+      desc: "Totalmente adaptado ao seu negócio.",
+    },
+    {
+      name: "Serviços",
+      desc: "Agendamentos e venda de serviços.",
     },
   ];
+
+  const plans = [
+    {
+      name: "Starter",
+      price: "3 000 MZN + 500 MZN/mês",
+      popular: true,
+    },
+    {
+      name: "Premium",
+      price: "9 000 MZN + 1 500 MZN/mês",
+    },
+  ];
+
+  
 
   return (
     <Flex bg="gray.50" minH="100vh" py={16} px={4}>
@@ -127,7 +171,7 @@ const QuestionnairePage = () => {
                   <Checkbox value="farmacia">Farmácia</Checkbox>
                   <Checkbox value="padaria">Padaria</Checkbox>
                   <Checkbox value="cosmeticos">Cosméticos</Checkbox>
-                  <Checkbox value="outro">Outro</Checkbox>
+                  <Checkbox value="confeitaria">Confeitaria</Checkbox>
                 </Grid>
               </CheckboxGroup>
             </Box>
@@ -160,10 +204,7 @@ const QuestionnairePage = () => {
             <Input placeholder="Link do logotipo" {...inputStyle} />
             <Input placeholder="Instagram / Site" {...inputStyle} />
 
-            <Textarea
-              placeholder="Descreva o estilo da sua marca"
-              {...inputStyle}
-            />
+            <Textarea placeholder="Descreva o estilo da sua marca" {...inputStyle} />
           </Stack>
         </Section>
 
@@ -180,13 +221,16 @@ const QuestionnairePage = () => {
               <option>100+</option>
             </Select>
 
-            <CheckboxGroup>
-              <Stack direction="row">
-                <Checkbox>Tamanho</Checkbox>
-                <Checkbox>Cor</Checkbox>
-                <Checkbox>Modelo</Checkbox>
-              </Stack>
-            </CheckboxGroup>
+            <Box>
+              <Label>Como deseja categorizar os seus produtos?</Label>
+              <CheckboxGroup onChange={(v)=>handleChange("categorias",v)}>
+                <Grid templateColumns="repeat(2,1fr)">
+                  {getProductOptions().map((opt) => (
+                    <Checkbox key={opt} value={opt}>{opt}</Checkbox>
+                  ))}
+                </Grid>
+              </CheckboxGroup>
+            </Box>
           </Stack>
         </Section>
 
@@ -251,9 +295,91 @@ const QuestionnairePage = () => {
         {/* Legal */}
         <Section icon={ShieldCheck} title="Informação Legal">
           <Stack spacing={4}>
-            <Input placeholder="Nome da empresa" {...inputStyle} />
-            <Input placeholder="NUIT" {...inputStyle} />
+            <Select
+              {...inputStyle}
+              onChange={(e)=>handleChange("registered", e.target.value)}
+            >
+              <option value="">Negócio registado?</option>
+              <option value="sim">Sim</option>
+              <option value="nao">Não</option>
+            </Select>
+
+            {form.registered === "sim" && (
+              <>
+                <Input placeholder="Nome da empresa" {...inputStyle} />
+                <Input placeholder="NUIT" {...inputStyle} />
+              </>
+            )}
+
+            {form.registered === "nao" && (
+              <>
+                <Input placeholder="Nome" {...inputStyle} />
+                <Input placeholder="Apelido" {...inputStyle} />
+                <Input type="date" {...inputStyle} />
+                <Input placeholder="Número de identificação (BI/Passaporte)" {...inputStyle} />
+                <Input placeholder="WhatsApp" {...inputStyle} />
+                <Textarea placeholder="Fale sobre si e o seu negócio" {...inputStyle} />
+              </>
+            )}
           </Stack>
+        </Section>
+
+         {/* 🔥 PROTOTYPE SELECTION */}
+        <Section icon={LayoutTemplate} title="Escolha o Protótipo">
+          <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
+            {prototypes.map((p) => (
+              <Box
+                key={p.name}
+                p={4}
+                borderRadius="xl"
+                border={`1px solid ${
+                  selectedPrototype === p.name ? primaryColor : borderColor
+                }`}
+                cursor="pointer"
+                onClick={() => setSelectedPrototype(p.name)}
+                boxShadow={
+                  selectedPrototype === p.name
+                    ? "0px 10px 25px rgba(37,99,235,0.2)"
+                    : "none"
+                }
+              >
+                <Heading size="sm">{p.name}</Heading>
+                <Text fontSize="sm" color={greyColor}>
+                  {p.desc}
+                </Text>
+              </Box>
+            ))}
+          </Grid>
+        </Section>
+
+        {/* 🔥 PLAN SELECTION */}
+        <Section icon={LayoutTemplate} title="Escolha o Plano">
+          <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
+            {plans.map((plan) => (
+              <Box
+                key={plan.name}
+                p={5}
+                borderRadius="xl"
+                border={`1px solid ${
+                  selectedPlan === plan.name ? primaryColor : borderColor
+                }`}
+                cursor="pointer"
+                onClick={() => setSelectedPlan(plan.name)}
+                boxShadow={
+                  selectedPlan === plan.name
+                    ? "0px 10px 25px rgba(37,99,235,0.2)"
+                    : "none"
+                }
+              >
+                {plan.popular && (
+                  <Badge colorScheme="blue">Mais Popular</Badge>
+                )}
+
+                <Heading size="md" mt={2}>{plan.name}</Heading>
+                <Text fontWeight="bold">{plan.price}</Text>
+              </Box>
+            ))}
+          </Grid>
         </Section>
 
         {/* Lançamento */}
@@ -267,48 +393,6 @@ const QuestionnairePage = () => {
               </Text>
             </Flex>
           </Stack>
-        </Section>
-
-        {/* Planos */}
-        <Section icon={LayoutTemplate} title="Escolha o Plano">
-          <Grid templateColumns={{ base: "1fr", md: "1fr 1fr 1fr" }} gap={6}>
-            {plans.map((plan) => (
-              <Box
-                key={plan.name}
-                border={`1px solid ${
-                  selectedPlan === plan.name ? primaryColor : borderColor
-                }`}
-                borderRadius="xl"
-                p={5}
-                cursor="pointer"
-                onClick={() => setSelectedPlan(plan.name)}
-                boxShadow={
-                  selectedPlan === plan.name
-                    ? "0px 10px 25px rgba(37,99,235,0.2)"
-                    : "none"
-                }
-              >
-                {plan.popular && (
-                  <Badge colorScheme="blue" mb={2}>
-                    Popular
-                  </Badge>
-                )}
-
-                <Heading size="md">{plan.name}</Heading>
-                <Text fontWeight="bold" my={2}>
-                  {plan.price}
-                </Text>
-
-                <Stack spacing={1}>
-                  {plan.features.map((f) => (
-                    <Text fontSize="sm" key={f}>
-                      • {f}
-                    </Text>
-                  ))}
-                </Stack>
-              </Box>
-            ))}
-          </Grid>
         </Section>
 
         {/* Submit */}
