@@ -1,8 +1,8 @@
 "use client";
-import React, { useState, useEffect, FC } from "react";
+
+import React, { FC, useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  Box,
   Button,
   Collapse,
   Flex,
@@ -17,37 +17,30 @@ import { StargateColors } from "#/src/utils/Colors";
 import useBannerVisibility from "#/src/utils/BannerVisibility";
 
 const NavItems = [
-  { name: "Funcionalidades", href: "/#features" },
-  { name: "Produto", href: "/#product" },
-  { name: "Preços", href: "/#pricing" },
+  { name: "Funcionalidades", href: "/#features", id: "features" },
+  { name: "Produto", href: "/#product", id: "product" },
+  { name: "Preços", href: "/#pricing", id: "pricing" },
 ];
 
 const Navbar: FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showBanner] = useBannerVisibility("vendo-banner");
   const [activeSection, setActiveSection] = useState("");
-  const { isOpen, onToggle } = useDisclosure();
+  const { isOpen, onToggle, onClose } = useDisclosure();
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > (showBanner ? 45 : 0));
+      setIsScrolled(window.scrollY > (showBanner ? 45 : 10));
 
-      const sectionIDs = NavItems.map((item) =>
-        item.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-      );
+      const current = NavItems.find((item) => {
+        const element = document.getElementById(item.id);
+        if (!element) return false;
 
-      const currentSection = sectionIDs.find((sectionID) => {
-        const sectionElement = document.getElementById(sectionID);
-        if (sectionElement) {
-          const { top, bottom } = sectionElement.getBoundingClientRect();
-          const isSectionInView = top >= 0 && bottom <= window.innerHeight;
-          return isSectionInView;
-        }
-        return false;
+        const rect = element.getBoundingClientRect();
+        return rect.top <= 180 && rect.bottom >= 180;
       });
 
-      if (currentSection) setActiveSection(currentSection);
-      else setActiveSection("");
+      setActiveSection(current?.id || "");
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -56,145 +49,150 @@ const Navbar: FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [showBanner]);
 
-  return (
-    <>
-      <Flex
-        position={isScrolled ? "fixed" : "absolute"}
-        top={0}
-        zIndex={100}
-        w="100%"
-        justify="center"
-        align="center"
-        bg={isScrolled ? "white" : "#ffffff25"}
-        backdropFilter="blur(24px)"
-        minH={75}
-        transition="all .25s ease"
-        borderBottom="1px solid #ffffff50"
-        direction="column"
-      >
-        {/* Navbar principal */}
-        <Flex
-          maxW={1440}
-          w="100%"
-          py={5}
-          px={{ base: 10, xl: 5 }}
-          align="center"
-          justify="space-between"
-        >
-          <Text
-            as={Link}
-            href="/"
-            fontSize="3xl"
-            fontWeight={700}
-            userSelect="none"
-            color={isScrolled ? "black" : "white"}
-          >
-            Loja.sale
-          </Text>
+  const textColor = isScrolled || isOpen ? "black" : "white";
+  const navBg = isScrolled || isOpen ? "whiteAlpha.950" : "rgba(255,255,255,0.08)";
 
-          {/* Links desktop */}
-          <Flex
-            gap={5}
-            display={{ base: "none", lg: "flex" }}
-            color={isScrolled ? "black" : "white"}
-          >
-            {NavItems.map((item, index) => (
+  return (
+    <Flex
+      as="nav"
+      position={isScrolled ? "fixed" : "absolute"}
+      top={0}
+      zIndex={100}
+      w="100%"
+      justify="center"
+      align="center"
+      direction="column"
+      bg={navBg}
+      backdropFilter="blur(22px)"
+      borderBottom={isScrolled || isOpen ? "1px solid #00000010" : "1px solid #ffffff22"}
+      transition="all .25s ease"
+    >
+      <Flex
+        maxW="1440px"
+        w="100%"
+        h={{ base: "72px", md: "80px" }}
+        px={{ base: 4, sm: 6, md: 10 }}
+        align="center"
+        justify="space-between"
+      >
+        <Text
+          as={Link}
+          href="/"
+          fontSize={{ base: "xl", md: "2xl" }}
+          fontWeight={900}
+          letterSpacing="-0.6px"
+          color={textColor}
+          onClick={onClose}
+        >
+          Loja
+          <Text as="span" color={StargateColors.primary}>
+            .Sale
+          </Text>
+        </Text>
+
+        <Flex gap={2} display={{ base: "none", lg: "flex" }} align="center">
+          {NavItems.map((item) => {
+            const active = activeSection === item.id;
+
+            return (
               <Flex
+                key={item.id}
                 as={Link}
                 href={item.href}
-                key={index}
-                px={5}
+                px={4}
                 py={2}
-                borderRadius={12}
-                transition="all .25s ease"
-                _hover={{ bg: isScrolled ? "#00000010" : "#ffffff25" }}
-                bg={
-                  activeSection ===
-                  item.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-                    ? isScrolled
-                      ? "#00000010"
-                      : "#ffffff25"
-                    : "transparent"
-                }
+                rounded="full"
+                fontWeight={700}
+                fontSize="sm"
+                transition="all .2s ease"
+                color={textColor}
+                bg={active ? (isScrolled ? "blackAlpha.100" : "whiteAlpha.300") : "transparent"}
+                _hover={{
+                  bg: isScrolled ? "blackAlpha.100" : "whiteAlpha.300",
+                }}
               >
-                <Text fontWeight={500}>{item.name}</Text>
+                {item.name}
               </Flex>
-            ))}
-          </Flex>
-
-          {/* Botões desktop */}
-          <Flex gap={4} display={{ base: "none", lg: "flex" }}>
-            {/* <Button variant="link" color={isScrolled ? "black" : "white"}>
-              Entrar
-            </Button> */}
-            <Button
-              as={motion.a}
-              whileHover={{ scale: 1.05 }}
-              href="/form"
-              rounded="full"
-              background={isScrolled ? StargateColors.primary : "white"}
-              color={isScrolled ? "white" : "black"}
-              _hover={{ bg: isScrolled ? StargateColors.primary : "white" }}
-              px={6}
-            >
-              Comece agora
-            </Button>
-          </Flex>
-
-          {/* Hamburger mobile */}
-          <IconButton
-            icon={<Icon as={isOpen ? X : Menu} />}
-            aria-label="Menu"
-            variant="unstyled"
-            onClick={onToggle}
-            color={isScrolled ? "black" : "white"}
-            display={{ base: "flex", lg: "none" }}
-            fontSize="lg"
-          />
+            );
+          })}
         </Flex>
 
-        {/* Menu mobile */}
-        <Collapse in={isOpen} animateOpacity>
-          <Flex
-            zIndex={10000}
-            w="100%"
-            justify="center"
-            align="center"
-            display={{ base: "flex", md: "none" }}
-            direction="column"
-            mb={5}
-            gap={4}
+        <Flex gap={3} display={{ base: "none", lg: "flex" }}>
+          <Button
+            as={motion.a}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
+            href="/form"
+            rounded="full"
+            px={6}
+            bg={isScrolled ? StargateColors.primary : "white"}
+            color={isScrolled ? "white" : "black"}
+            shadow={isScrolled ? "sm" : "0 10px 28px rgba(0,0,0,0.12)"}
+            _hover={{ opacity: 0.92 }}
           >
-            {NavItems.map((item, index) => (
-              <Link key={index} href={item.href}>
-                <Text
-                  fontWeight={500}
-                  fontSize="lg"
-                  color={isScrolled ? "black" : "white"}
-                >
-                  {item.name}
-                </Text>
-              </Link>
-            ))}
-            <Flex gap={4} mt={3} direction="column">
-              {/* <Button variant="link" color={isScrolled ? "black" : "white"}>
-                Entrar
-              </Button> */}
-              <Button
-                as={motion.a}
-                whileHover={{ scale: 1.05 }}
-                href="/form"
-                rounded="full"
-                background={isScrolled ? StargateColors.primary : "white"}
-                color={isScrolled ? "white" : "black"}
-              >
-                Comece agora
-              </Button>
-            </Flex>
-          </Flex>
-        </Collapse>
+            Começar
+          </Button>
+        </Flex>
+
+        <IconButton
+          icon={<Icon as={isOpen ? X : Menu} boxSize={5} />}
+          aria-label={isOpen ? "Fechar menu" : "Abrir menu"}
+          variant="ghost"
+          onClick={onToggle}
+          color={textColor}
+          display={{ base: "flex", lg: "none" }}
+          rounded="full"
+          _hover={{
+            bg: isScrolled || isOpen ? "blackAlpha.100" : "whiteAlpha.200",
+          }}
+        />
       </Flex>
-    </>
+
+      <Collapse in={isOpen} animateOpacity style={{ width: "100%" }}>
+        <Flex
+          direction="column"
+          align="stretch"
+          gap={2}
+          px={4}
+          pb={5}
+          display={{ base: "flex", lg: "none" }}
+          bg="whiteAlpha.950"
+          borderTop="1px solid #00000008"
+        >
+          {NavItems.map((item) => (
+            <Flex
+              key={item.id}
+              as={Link}
+              href={item.href}
+              onClick={onClose}
+              px={4}
+              py={3}
+              rounded="xl"
+              color="black"
+              fontWeight={700}
+              bg={activeSection === item.id ? "blackAlpha.100" : "transparent"}
+              _hover={{ bg: "blackAlpha.100" }}
+            >
+              {item.name}
+            </Flex>
+          ))}
+
+          <Button
+            as={Link}
+            href="/form"
+            rounded="full"
+            bg={StargateColors.primary}
+            color="white"
+            h="48px"
+            mt={2}
+            onClick={onClose}
+            _hover={{ opacity: 0.9 }}
+          >
+            Começar agora
+          </Button>
+        </Flex>
+      </Collapse>
+    </Flex>
   );
 };
 

@@ -8,14 +8,16 @@ import Banner from "../components/Banner";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
-import "./globals.scss";
+// import "./globals.scss";
 
 interface LayoutProps {
   children: ReactNode;
 }
 
+const siteUrl = "https://loja.sale";
+
 export const viewport: Viewport = {
-  themeColor: "#2563EB", // Azul moderno Loja.Sale
+  themeColor: "#2563EB",
   colorScheme: "light",
   initialScale: 1,
   width: "device-width",
@@ -23,19 +25,39 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    template: "Loja.Sale | %s",
-    default: "Loja.Sale",
+    template: "%s | Loja.Sale",
+    default: "Loja.Sale | Digitalize o seu Negócio",
   },
   description:
-    "Loja.Sale é uma plataforma desenvolvida pela SyncTechX que permite a qualquer negócio criar a sua loja online de forma simples, rápida e profissional. Ideal para lojas, restaurantes, padarias e empreendedores em Moçambique.",
-  icons: [{ rel: "icon", url: favicon.src }],
-  metadataBase: new URL("https://Loja.sale/"),
+    "Crie a sua loja online com a Loja.Sale. Uma plataforma da SyncTechX para negócios locais venderem online de forma simples, rápida e profissional.",
+  keywords: [
+    "Loja.Sale",
+    "loja online",
+    "e-commerce Moçambique",
+    "criar loja online",
+    "vender online",
+    "SyncTechX",
+    "lojas digitais",
+    "templates de loja online",
+  ],
+  authors: [{ name: "SyncTechX" }],
+  creator: "SyncTechX",
+  publisher: "SyncTechX",
+  icons: {
+    icon: favicon.src,
+    shortcut: favicon.src,
+    apple: favicon.src,
+  },
+  metadataBase: new URL(siteUrl),
+  alternates: {
+    canonical: siteUrl,
+  },
   openGraph: {
     title: "Loja.Sale | Digitalize o seu Negócio",
     siteName: "Loja.Sale",
     description:
       "Crie a sua loja online com a Loja.Sale. Plataforma desenvolvida pela SyncTechX para ajudar negócios locais a vender online com facilidade.",
-    url: "https://Loja.sale/",
+    url: siteUrl,
     type: "website",
     locale: "pt_PT",
     images: [
@@ -61,8 +83,9 @@ export const metadata: Metadata = {
       },
     ],
   },
-  alternates: {
-    canonical: "https://Loja.sale/",
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 
