@@ -19,8 +19,9 @@ import { StargateColors } from "#/src/utils/Colors";
 import { LuArrowRight, LuCheckCircle, LuSparkles, LuZap } from "react-icons/lu";
 import Link from "next/link";
 
-const words = ["Moda", "Padaria", "Eletrónica", "Produtos", "Startups", "PMEs"];
+const MotionHeading = motion(Heading);
 
+const words = ["Moda", "Padaria", "Eletrónica", "Produtos", "Startups", "PMEs"];
 const stats = ["Templates prontos", "Entrega em 72h", "Sem programar"];
 
 const Header = () => {
@@ -109,9 +110,9 @@ const Header = () => {
           </Heading>
 
           <AnimatePresence mode="wait">
-            <Heading
-              as={motion.h1}
+            <MotionHeading
               key={currentWord}
+              as="h1"
               fontSize={{ base: "42px", sm: "52px", md: "72px", lg: "90px" }}
               color={StargateColors.darkBg}
               lineHeight={{ base: "1", md: "0.95" }}
@@ -124,7 +125,7 @@ const Header = () => {
               transition={{ duration: 0.35 }}
             >
               {currentWord}
-            </Heading>
+            </MotionHeading>
           </AnimatePresence>
         </Box>
 
