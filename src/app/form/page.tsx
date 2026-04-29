@@ -6,6 +6,7 @@ import {
   Button,
   Checkbox,
   CheckboxGroup,
+  Divider,
   Flex,
   Grid,
   Heading,
@@ -32,6 +33,10 @@ import {
   Truck,
   User,
 } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
+
+const API_BASE_URL = "https://ejem-donations.onrender.com";
+const WHATSAPP_NUMBER = "258847529665"; // replace with your real number
 
 const primaryColor = "#2563EB";
 const darkColor = "#0F172A";
@@ -46,6 +51,8 @@ const inputStyle = {
     boxShadow: `0 0 0 1px ${primaryColor}`,
   },
 };
+
+type Step = "form" | "summary" | "success";
 
 interface SectionProps {
   icon: React.ElementType;
@@ -88,48 +95,56 @@ const Label = ({ children }: { children: ReactNode }) => (
 );
 
 const prototypes = [
-  {
-    name: "Confeitaria",
-    desc: "Loja moderna para cafés, padarias e pastelarias.",
-  },
-  {
-    name: "Eletrónicos",
-    desc: "Venda de gadgets, smartphones e tecnologia.",
-  },
-  {
-    name: "Produtos",
-    desc: "Loja completa para múltiplos produtos.",
-  },
-  {
-    name: "Moda",
-    desc: "Design elegante para roupa e acessórios.",
-  },
-  {
-    name: "Personalizado",
-    desc: "Design e funcionalidades feitas à medida.",
-  },
-  {
-    name: "Serviços",
-    desc: "Ideal para marcações, consultorias e serviços.",
-  },
+  { name: "Confeitaria", desc: "Loja moderna para cafés, padarias e pastelarias." },
+  { name: "Eletrónicos", desc: "Venda de gadgets, smartphones e tecnologia." },
+  { name: "Produtos", desc: "Loja completa para múltiplos produtos." },
+  { name: "Moda", desc: "Design elegante para roupa e acessórios." },
+  { name: "Personalizado", desc: "Design e funcionalidades feitas à medida." },
+  { name: "Serviços", desc: "Ideal para marcações, consultorias e serviços." },
 ];
 
 const plans = [
   {
     name: "Starter",
     price: "3 000 MZN + 500 MZN/mês",
+    amount: 1,
     desc: "Ideal para começar rapidamente com uma loja profissional.",
     popular: true,
   },
   {
     name: "Premium",
     price: "9 000 MZN + 1 500 MZN/mês",
+    amount: 1,
     desc: "Ideal para negócios que precisam de personalização avançada.",
   },
 ];
 
+const SummaryItem = ({ label, value }: { label: string; value: any }) => {
+  if (!value || (Array.isArray(value) && value.length === 0)) return null;
+
+  return (
+    <Flex
+      direction={{ base: "column", md: "row" }}
+      justify="space-between"
+      gap={2}
+      py={3}
+      borderBottom="1px solid"
+      borderColor="gray.100"
+    >
+      <Text fontWeight={700} color={darkColor} fontSize="sm">
+        {label}
+      </Text>
+      <Text color={greyColor} fontSize="sm" textAlign={{ base: "left", md: "right" }}>
+        {Array.isArray(value) ? value.join(", ") : String(value)}
+      </Text>
+    </Flex>
+  );
+};
+
 const QuestionnairePage = () => {
   const toast = useToast();
+  const [step, setStep] = useState<Step>("form");
+  const [isPaying, setIsPaying] = useState(false);
 
   const [form, setForm] = useState<any>({
     businessTypes: [],
@@ -139,7 +154,10 @@ const QuestionnairePage = () => {
     deliveryMethods: [],
     selectedPrototype: "",
     selectedPlan: "Starter",
+    paymentMethod: "M-Pesa",
   });
+
+  const selectedPlanData = plans.find((p) => p.name === form.selectedPlan) || plans[0];
 
   const handleChange = (key: string, value: any) => {
     setForm((prev: any) => ({ ...prev, [key]: value }));
@@ -167,7 +185,7 @@ const QuestionnairePage = () => {
     return ["Categoria", "Tipo", "Marca", "Preço", "Disponibilidade"];
   }, [form.businessTypes]);
 
-  const handleSubmit = () => {
+  const validateForm = () => {
     if (!form.storeName || !form.ownerName || !form.whatsapp) {
       toast({
         title: "Campos obrigatórios em falta",
@@ -177,32 +195,241 @@ const QuestionnairePage = () => {
         duration: 4000,
         isClosable: true,
       });
-      return;
+      return false;
     }
 
-    console.log("QUESTIONÁRIO LOJA.SALE:", form);
-
-    toast({
-      title: "Questionário pronto",
-      description: "Os dados foram recolhidos com sucesso.",
-      status: "success",
-      duration: 4000,
-      isClosable: true,
-    });
+    return true;
   };
+
+  const handleSubmitRequest = () => {
+    if (!validateForm()) return;
+    setStep("summary");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleFinalizePurchase = async () => {
+    try {
+      setIsPaying(true);
+
+      const payload = {
+        donorName: form.ownerName,
+        donorContact: form.whatsapp,
+        anonymousDonation: false,
+        amount: selectedPlanData.amount,
+        paymentMethod: form.paymentMethod,
+        donationMode: "money",
+        selectedGoods: [],
+        otherDonation: "",
+        deliveryMethod: "",
+        message: JSON.stringify({
+          type: "Loja.Sale Store Request",
+          storeName: form.storeName,
+          selectedPlan: form.selectedPlan,
+          selectedPrototype: form.selectedPrototype,
+          questionnaire: form,
+        }),
+      };
+
+      localStorage.setItem(
+        "loja-sale-pending-order",
+        JSON.stringify({
+          ...form,
+          amount: selectedPlanData.amount,
+          planPrice: selectedPlanData.price,
+          createdAt: new Date().toISOString(),
+        })
+      );
+
+      const response = await fetch(`${API_BASE_URL}/api/donations/create-payment`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || result?.status !== "success") {
+        throw new Error(result?.message || "Não foi possível iniciar o pagamento.");
+      }
+
+      if (result?.data?.checkoutUrl) {
+        window.location.href = result.data.checkoutUrl;
+        return;
+      }
+
+      setStep("success");
+    } catch (error: any) {
+      toast({
+        title: "Erro no pagamento",
+        description: error?.message || "Tente novamente.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsPaying(false);
+    }
+  };
+
+  const whatsappText = encodeURIComponent(
+    `Olá, submeti um pedido na Loja.Sale para a loja "${form.storeName || ""}" e gostaria de falar convosco.`
+  );
+
+  if (step === "success") {
+    return (
+      <Flex bg="gray.50" minH="100vh" py={{ base: 12, md: 20 }} px={4}>
+        <Flex maxW={760} mx="auto" w="100%" align="center" justify="center">
+          <Box bg="white" p={{ base: 6, md: 10 }} rounded="3xl" shadow="lg" textAlign="center">
+            <Badge colorScheme="green" rounded="full" px={4} py={2} mb={5}>
+              Pedido submetido
+            </Badge>
+
+            <Heading mb={4}>Pagamento iniciado com sucesso</Heading>
+
+            <Text color={greyColor} lineHeight="1.8" mb={8}>
+              Obrigado. O seu pedido foi registado. Após a confirmação do
+              pagamento, a nossa equipa entrará em contacto para iniciar a
+              configuração da sua loja.
+            </Text>
+
+            <Button
+              as="a"
+              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappText}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              leftIcon={<FaWhatsapp />}
+              bg="#25D366"
+              color="white"
+              size="lg"
+              rounded="full"
+              _hover={{ opacity: 0.9 }}
+            >
+              Falar connosco no WhatsApp
+            </Button>
+          </Box>
+        </Flex>
+      </Flex>
+    );
+  }
+
+  if (step === "summary") {
+    return (
+      <Flex bg="gray.50" minH="100vh" py={{ base: 12, md: 16 }} px={4}>
+        <Flex direction="column" maxW={980} mx="auto" w="100%" gap={8}>
+          <Box textAlign="center">
+            <Badge colorScheme="blue" rounded="full" px={4} py={2} mb={4}>
+              Resumo do pedido
+            </Badge>
+
+            <Heading mb={3} fontSize={{ base: "3xl", md: "5xl" }}>
+              Confirme os dados da sua loja
+            </Heading>
+
+            <Text color={greyColor} maxW={680} mx="auto">
+              Revise as informações abaixo antes de finalizar a compra.
+            </Text>
+          </Box>
+
+          <Section icon={Store} title="Resumo do Questionário">
+            <Stack spacing={1}>
+              <SummaryItem label="Nome da loja" value={form.storeName} />
+              <SummaryItem label="Responsável" value={form.ownerName} />
+              <SummaryItem label="WhatsApp" value={form.whatsapp} />
+              <SummaryItem label="Email" value={form.email} />
+              <SummaryItem label="Cidade" value={form.city} />
+              <SummaryItem label="Tipo de negócio" value={form.businessTypes} />
+              <SummaryItem label="Loja física" value={form.hasPhysicalStore} />
+              <SummaryItem label="Tempo de existência" value={form.businessAge} />
+              <SummaryItem label="Descrição do negócio" value={form.businessDescription} />
+              <SummaryItem label="Cores preferidas" value={form.brandColors} />
+              <SummaryItem label="Logo" value={form.logoLink} />
+              <SummaryItem label="Redes sociais / site" value={form.socialLinks} />
+              <SummaryItem label="Estilo desejado" value={form.brandStyle} />
+              <SummaryItem label="Produtos / serviços" value={form.mainProducts} />
+              <SummaryItem label="Quantidade de produtos" value={form.productQuantity} />
+              <SummaryItem label="Fotos dos produtos" value={form.hasProductPhotos} />
+              <SummaryItem label="Categorias" value={form.productCategories} />
+              <SummaryItem label="Pagamentos" value={form.paymentMethods} />
+              <SummaryItem label="Entregas" value={form.deliveryMethods} />
+              <SummaryItem label="Zonas de entrega" value={form.deliveryAreas} />
+              <SummaryItem label="Receber pedidos via" value={form.orderMethod} />
+              <SummaryItem label="Domínio" value={form.domainStatus} />
+              <SummaryItem label="Domínio desejado" value={form.desiredDomain} />
+              <SummaryItem label="Negócio registado" value={form.registered} />
+              <SummaryItem label="Protótipo" value={form.selectedPrototype} />
+              <SummaryItem label="Plano" value={form.selectedPlan} />
+              <SummaryItem label="Lançamento" value={form.launchDate} />
+              <SummaryItem label="Observações finais" value={form.finalNotes} />
+            </Stack>
+          </Section>
+
+          <Section icon={CreditCard} title="Pagamento">
+            <Stack spacing={4}>
+              <Box>
+                <Text fontWeight={800}>Valor inicial</Text>
+                <Heading fontSize={{ base: "3xl", md: "4xl" }} color={primaryColor}>
+                  {selectedPlanData.amount.toLocaleString("pt-MZ")} MZN
+                </Heading>
+                <Text color={greyColor} fontSize="sm">
+                  Plano: {selectedPlanData.price}
+                </Text>
+              </Box>
+
+              <Box>
+                <Label>Método de pagamento</Label>
+                <Select
+                  {...inputStyle}
+                  value={form.paymentMethod}
+                  onChange={(e) => handleChange("paymentMethod", e.target.value)}
+                >
+                  <option value="M-Pesa">M-Pesa</option>
+                  <option value="e-Mola">e-Mola</option>
+                  <option value="Cartão">Cartão</option>
+                </Select>
+              </Box>
+
+              <Divider />
+
+              <Flex gap={3} direction={{ base: "column", md: "row" }}>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  rounded="xl"
+                  flex={1}
+                  onClick={() => setStep("form")}
+                >
+                  Editar dados
+                </Button>
+
+                <Button
+                  bg={primaryColor}
+                  color="white"
+                  size="lg"
+                  rounded="xl"
+                  flex={1}
+                  isLoading={isPaying}
+                  loadingText="A iniciar pagamento"
+                  onClick={handleFinalizePurchase}
+                  _hover={{ opacity: 0.9 }}
+                >
+                  Finalizar compra
+                </Button>
+              </Flex>
+            </Stack>
+          </Section>
+        </Flex>
+      </Flex>
+    );
+  }
 
   return (
     <Flex bg="gray.50" minH="100vh" py={{ base: 12, md: 16 }} px={4}>
       <Flex direction="column" maxW={980} mx="auto" w="100%" gap={8}>
         <Box textAlign="center">
-          <Badge
-            px={4}
-            py={2}
-            mb={4}
-            borderRadius="full"
-            colorScheme="blue"
-            textTransform="none"
-          >
+          <Badge px={4} py={2} mb={4} borderRadius="full" colorScheme="blue">
             Loja.Sale
           </Badge>
 
@@ -210,82 +437,48 @@ const QuestionnairePage = () => {
             Criação de Loja Online
           </Heading>
 
-          <Text color={greyColor} maxW={680} mx="auto" fontSize="md">
-            Preencha este questionário para entendermos o seu negócio,
-            produtos, identidade visual, pagamentos, entregas e necessidades
-            técnicas.
+          <Text color={greyColor} maxW={680} mx="auto">
+            Preencha o questionário para recebermos todas as informações
+            necessárias para criar a sua loja.
           </Text>
         </Box>
 
-        <Section
-          icon={User}
-          title="Dados do Responsável"
-          description="Informações da pessoa que será contactada durante o processo."
-        >
+        <Section icon={User} title="Dados do Responsável">
           <Stack spacing={4}>
             <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
               <Box>
                 <Label>Nome completo *</Label>
-                <Input
-                  placeholder="Ex: Nilton Novele"
-                  {...inputStyle}
-                  onChange={(e) => handleChange("ownerName", e.target.value)}
-                />
+                <Input {...inputStyle} onChange={(e) => handleChange("ownerName", e.target.value)} />
               </Box>
-
               <Box>
                 <Label>WhatsApp *</Label>
-                <Input
-                  placeholder="Ex: +258 84 000 0000"
-                  {...inputStyle}
-                  onChange={(e) => handleChange("whatsapp", e.target.value)}
-                />
+                <Input {...inputStyle} onChange={(e) => handleChange("whatsapp", e.target.value)} />
               </Box>
             </Grid>
 
             <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
               <Box>
                 <Label>Email</Label>
-                <Input
-                  type="email"
-                  placeholder="email@exemplo.com"
-                  {...inputStyle}
-                  onChange={(e) => handleChange("email", e.target.value)}
-                />
+                <Input type="email" {...inputStyle} onChange={(e) => handleChange("email", e.target.value)} />
               </Box>
-
               <Box>
                 <Label>Cidade</Label>
-                <Input
-                  placeholder="Ex: Maputo"
-                  {...inputStyle}
-                  onChange={(e) => handleChange("city", e.target.value)}
-                />
+                <Input {...inputStyle} onChange={(e) => handleChange("city", e.target.value)} />
               </Box>
             </Grid>
           </Stack>
         </Section>
 
-        <Section
-          icon={Store}
-          title="Identificação da Loja"
-          description="Dados principais sobre o negócio."
-        >
+        <Section icon={Store} title="Identificação da Loja">
           <Stack spacing={4}>
             <Box>
               <Label>Nome da loja *</Label>
-              <Input
-                placeholder="Ex: Bella Fashion"
-                {...inputStyle}
-                onChange={(e) => handleChange("storeName", e.target.value)}
-              />
+              <Input {...inputStyle} onChange={(e) => handleChange("storeName", e.target.value)} />
             </Box>
 
             <Box>
               <Label>Tipo de negócio</Label>
-              <CheckboxGroup
-                onChange={(value) => handleChange("businessTypes", value)}
-              >
+              <CheckboxGroup onChange={(value) => handleChange("businessTypes", value)}>
                 <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={3}>
                   <Checkbox value="moda">Moda</Checkbox>
                   <Checkbox value="eletronicos">Eletrónica</Checkbox>
@@ -300,441 +493,103 @@ const QuestionnairePage = () => {
               </CheckboxGroup>
             </Box>
 
-            <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
-              <Box>
-                <Label>Tem loja física?</Label>
-                <Select
-                  placeholder="Selecione uma opção"
-                  {...inputStyle}
-                  onChange={(e) => handleChange("hasPhysicalStore", e.target.value)}
-                >
-                  <option value="sim">Sim</option>
-                  <option value="nao">Não</option>
-                </Select>
-              </Box>
-
-              <Box>
-                <Label>Tempo de existência</Label>
-                <Select
-                  placeholder="Selecione uma opção"
-                  {...inputStyle}
-                  onChange={(e) => handleChange("businessAge", e.target.value)}
-                >
-                  <option value="novo">Ainda estou a começar</option>
-                  <option value="menos-1-ano">Menos de 1 ano</option>
-                  <option value="1-3-anos">1–3 anos</option>
-                  <option value="3-mais">Mais de 3 anos</option>
-                </Select>
-              </Box>
-            </Grid>
-
-            <Box>
-              <Label>Descreva brevemente o seu negócio</Label>
-              <Textarea
-                placeholder="Fale sobre o que vende, público-alvo e objetivo principal."
-                {...inputStyle}
-                onChange={(e) => handleChange("businessDescription", e.target.value)}
-              />
-            </Box>
+            <Textarea
+              placeholder="Descreva brevemente o seu negócio"
+              {...inputStyle}
+              onChange={(e) => handleChange("businessDescription", e.target.value)}
+            />
           </Stack>
         </Section>
 
-        <Section
-          icon={Palette}
-          title="Identidade Visual"
-          description="Ajuda-nos a criar uma loja alinhada com a sua marca."
-        >
+        <Section icon={Palette} title="Identidade Visual">
           <Stack spacing={4}>
-            <Box>
-              <Label>Cores preferidas</Label>
-              <CheckboxGroup
-                onChange={(value) => handleChange("brandColors", value)}
-              >
-                <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={3}>
-                  <Checkbox value="azul">Azul</Checkbox>
-                  <Checkbox value="preto-dourado">Preto & Dourado</Checkbox>
-                  <Checkbox value="vermelho">Vermelho</Checkbox>
-                  <Checkbox value="verde">Verde</Checkbox>
-                  <Checkbox value="rosa">Rosa</Checkbox>
-                  <Checkbox value="minimalista">Minimalista</Checkbox>
-                  <Checkbox value="luxo">Luxo</Checkbox>
-                  <Checkbox value="nao-sei">Ainda não sei</Checkbox>
-                </Grid>
-              </CheckboxGroup>
-            </Box>
-
-            <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
-              <Box>
-                <Label>Link do logotipo</Label>
-                <Input
-                  placeholder="Google Drive, Instagram, site, etc."
-                  {...inputStyle}
-                  onChange={(e) => handleChange("logoLink", e.target.value)}
-                />
-              </Box>
-
-              <Box>
-                <Label>Instagram / Facebook / Website</Label>
-                <Input
-                  placeholder="@sualoja ou link"
-                  {...inputStyle}
-                  onChange={(e) => handleChange("socialLinks", e.target.value)}
-                />
-              </Box>
-            </Grid>
-
-            <Box>
-              <Label>Estilo desejado</Label>
-              <Textarea
-                placeholder="Ex: moderno, simples, premium, colorido, elegante..."
-                {...inputStyle}
-                onChange={(e) => handleChange("brandStyle", e.target.value)}
-              />
-            </Box>
-          </Stack>
-        </Section>
-
-        <Section
-          icon={Package}
-          title="Produtos e Catálogo"
-          description="Informações sobre produtos, categorias e organização da loja."
-        >
-          <Stack spacing={4}>
-            <Box>
-              <Label>Principais produtos ou serviços</Label>
-              <Textarea
-                placeholder="Liste os principais produtos/serviços que pretende vender."
-                {...inputStyle}
-                onChange={(e) => handleChange("mainProducts", e.target.value)}
-              />
-            </Box>
-
-            <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
-              <Box>
-                <Label>Quantidade inicial de produtos</Label>
-                <Select
-                  placeholder="Selecione uma opção"
-                  {...inputStyle}
-                  onChange={(e) => handleChange("productQuantity", e.target.value)}
-                >
-                  <option value="1-20">1–20</option>
-                  <option value="20-50">20–50</option>
-                  <option value="50-100">50–100</option>
-                  <option value="100-mais">100+</option>
-                </Select>
-              </Box>
-
-              <Box>
-                <Label>Tem fotos dos produtos?</Label>
-                <Select
-                  placeholder="Selecione uma opção"
-                  {...inputStyle}
-                  onChange={(e) => handleChange("hasProductPhotos", e.target.value)}
-                >
-                  <option value="sim">Sim</option>
-                  <option value="nao">Não</option>
-                  <option value="algumas">Tenho algumas</option>
-                </Select>
-              </Box>
-            </Grid>
-
-            <Box>
-              <Label>Como deseja categorizar os produtos?</Label>
-              <CheckboxGroup
-                onChange={(value) => handleChange("productCategories", value)}
-              >
-                <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={3}>
-                  {productOptions.map((option) => (
-                    <Checkbox key={option} value={option}>
-                      {option}
-                    </Checkbox>
-                  ))}
-                </Grid>
-              </CheckboxGroup>
-            </Box>
-
-            <Box>
-              <Label>Observações sobre produtos</Label>
-              <Textarea
-                placeholder="Ex: produtos com variações, tamanhos, stock limitado, promoções, etc."
-                {...inputStyle}
-                onChange={(e) => handleChange("productNotes", e.target.value)}
-              />
-            </Box>
-          </Stack>
-        </Section>
-
-        <Section
-          icon={CreditCard}
-          title="Pagamentos"
-          description="Métodos de pagamento que pretende aceitar."
-        >
-          <Stack spacing={4}>
-            <CheckboxGroup
-              onChange={(value) => handleChange("paymentMethods", value)}
-            >
+            <CheckboxGroup onChange={(value) => handleChange("brandColors", value)}>
               <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={3}>
-                <Checkbox value="mpesa">M-Pesa</Checkbox>
-                <Checkbox value="emola">e-Mola</Checkbox>
-                <Checkbox value="mkesh">mKesh</Checkbox>
-                <Checkbox value="transferencia">Transferência Bancária</Checkbox>
-                <Checkbox value="cod">Pagamento na Entrega</Checkbox>
-                <Checkbox value="pos">POS / Cartão</Checkbox>
+                <Checkbox value="azul">Azul</Checkbox>
+                <Checkbox value="preto-dourado">Preto & Dourado</Checkbox>
+                <Checkbox value="vermelho">Vermelho</Checkbox>
+                <Checkbox value="verde">Verde</Checkbox>
+                <Checkbox value="minimalista">Minimalista</Checkbox>
+                <Checkbox value="luxo">Luxo</Checkbox>
               </Grid>
             </CheckboxGroup>
 
-            <Box>
-              <Label>Dados ou observações sobre pagamento</Label>
-              <Textarea
-                placeholder="Ex: número M-Pesa, banco, regras de confirmação, etc."
-                {...inputStyle}
-                onChange={(e) => handleChange("paymentNotes", e.target.value)}
-              />
-            </Box>
+            <Input placeholder="Link do logotipo" {...inputStyle} onChange={(e) => handleChange("logoLink", e.target.value)} />
+            <Input placeholder="Instagram / Facebook / Website" {...inputStyle} onChange={(e) => handleChange("socialLinks", e.target.value)} />
+            <Textarea placeholder="Estilo desejado" {...inputStyle} onChange={(e) => handleChange("brandStyle", e.target.value)} />
           </Stack>
         </Section>
 
-        <Section
-          icon={Truck}
-          title="Entregas e Recolha"
-          description="Como os clientes vão receber os produtos."
-        >
+        <Section icon={Package} title="Produtos e Catálogo">
           <Stack spacing={4}>
-            <CheckboxGroup
-              onChange={(value) => handleChange("deliveryMethods", value)}
-            >
+            <Textarea placeholder="Principais produtos ou serviços" {...inputStyle} onChange={(e) => handleChange("mainProducts", e.target.value)} />
+
+            <Select placeholder="Quantidade inicial de produtos" {...inputStyle} onChange={(e) => handleChange("productQuantity", e.target.value)}>
+              <option value="1-20">1–20</option>
+              <option value="20-50">20–50</option>
+              <option value="50-100">50–100</option>
+              <option value="100-mais">100+</option>
+            </Select>
+
+            <CheckboxGroup onChange={(value) => handleChange("productCategories", value)}>
+              <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={3}>
+                {productOptions.map((option) => (
+                  <Checkbox key={option} value={option}>
+                    {option}
+                  </Checkbox>
+                ))}
+              </Grid>
+            </CheckboxGroup>
+          </Stack>
+        </Section>
+
+        <Section icon={CreditCard} title="Pagamentos">
+          <CheckboxGroup onChange={(value) => handleChange("paymentMethods", value)}>
+            <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={3}>
+              <Checkbox value="mpesa">M-Pesa</Checkbox>
+              <Checkbox value="emola">e-Mola</Checkbox>
+              <Checkbox value="mkesh">mKesh</Checkbox>
+              <Checkbox value="transferencia">Transferência Bancária</Checkbox>
+              <Checkbox value="cod">Pagamento na Entrega</Checkbox>
+              <Checkbox value="pos">POS / Cartão</Checkbox>
+            </Grid>
+          </CheckboxGroup>
+        </Section>
+
+        <Section icon={Truck} title="Entregas e Recolha">
+          <Stack spacing={4}>
+            <CheckboxGroup onChange={(value) => handleChange("deliveryMethods", value)}>
               <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={3}>
                 <Checkbox value="retirada">Retirada na loja</Checkbox>
                 <Checkbox value="delivery">Delivery</Checkbox>
                 <Checkbox value="motoboy">Motoboy</Checkbox>
-                <Checkbox value="correios">Envio por transportadora</Checkbox>
+                <Checkbox value="transportadora">Transportadora</Checkbox>
               </Grid>
             </CheckboxGroup>
 
-            <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
-              <Box>
-                <Label>Cobra taxa de entrega?</Label>
-                <Select
-                  placeholder="Selecione uma opção"
-                  {...inputStyle}
-                  onChange={(e) => handleChange("deliveryFee", e.target.value)}
-                >
-                  <option value="sim">Sim</option>
-                  <option value="nao">Não</option>
-                  <option value="depende">Depende da zona</option>
-                </Select>
-              </Box>
-
-              <Box>
-                <Label>Zonas de entrega</Label>
-                <Input
-                  placeholder="Ex: Maputo, Matola, Cidade..."
-                  {...inputStyle}
-                  onChange={(e) => handleChange("deliveryAreas", e.target.value)}
-                />
-              </Box>
-            </Grid>
-
-            <Box>
-              <Label>Regras de entrega</Label>
-              <Textarea
-                placeholder="Ex: entregas em 24h, taxa por bairro, horários, etc."
-                {...inputStyle}
-                onChange={(e) => handleChange("deliveryRules", e.target.value)}
-              />
-            </Box>
+            <Input placeholder="Zonas de entrega" {...inputStyle} onChange={(e) => handleChange("deliveryAreas", e.target.value)} />
           </Stack>
         </Section>
 
-        <Section
-          icon={MessageCircle}
-          title="Comunicação e Pedidos"
-          description="Defina como pretende receber contactos e pedidos."
-        >
+        <Section icon={Globe} title="Configuração Técnica">
           <Stack spacing={4}>
-            <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
-              <Box>
-                <Label>WhatsApp principal da loja</Label>
-                <Input
-                  placeholder="+258 84 000 0000"
-                  {...inputStyle}
-                  onChange={(e) => handleChange("storeWhatsapp", e.target.value)}
-                />
-              </Box>
+            <Select placeholder="Domínio" {...inputStyle} onChange={(e) => handleChange("domainStatus", e.target.value)}>
+              <option value="tenho">Já tenho domínio</option>
+              <option value="preciso">Preciso de ajuda</option>
+              <option value="subdominio">Quero começar com subdomínio</option>
+            </Select>
 
-              <Box>
-                <Label>Receber pedidos via</Label>
-                <Select
-                  placeholder="Selecione uma opção"
-                  {...inputStyle}
-                  onChange={(e) => handleChange("orderMethod", e.target.value)}
-                >
-                  <option value="whatsapp">WhatsApp</option>
-                  <option value="checkout">Checkout automático</option>
-                  <option value="ambos">Ambos</option>
-                </Select>
-              </Box>
-            </Grid>
-
-            <Box>
-              <Label>Mensagem automática desejada</Label>
-              <Textarea
-                placeholder="Ex: Olá, recebemos o seu pedido. Em breve entraremos em contacto..."
-                {...inputStyle}
-                onChange={(e) => handleChange("autoMessage", e.target.value)}
-              />
-            </Box>
+            <Input placeholder="Nome de domínio desejado" {...inputStyle} onChange={(e) => handleChange("desiredDomain", e.target.value)} />
           </Stack>
         </Section>
 
-        <Section
-          icon={Globe}
-          title="Configuração Técnica"
-          description="Domínio, hospedagem e integrações."
-        >
-          <Stack spacing={4}>
-            <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
-              <Box>
-                <Label>Domínio</Label>
-                <Select
-                  placeholder="Selecione uma opção"
-                  {...inputStyle}
-                  onChange={(e) => handleChange("domainStatus", e.target.value)}
-                >
-                  <option value="tenho">Já tenho domínio</option>
-                  <option value="preciso">Preciso de ajuda</option>
-                  <option value="subdominio">Quero começar com subdomínio</option>
-                </Select>
-              </Box>
-
-              <Box>
-                <Label>Nome de domínio desejado</Label>
-                <Input
-                  placeholder="Ex: minhaloja.co.mz"
-                  {...inputStyle}
-                  onChange={(e) => handleChange("desiredDomain", e.target.value)}
-                />
-              </Box>
-            </Grid>
-
-            <Box>
-              <Label>Integrações necessárias</Label>
-              <Textarea
-                placeholder="Ex: WhatsApp, pagamentos, Google Analytics, Facebook Pixel, sistema de stock..."
-                {...inputStyle}
-                onChange={(e) => handleChange("integrations", e.target.value)}
-              />
-            </Box>
-          </Stack>
-        </Section>
-
-        <Section
-          icon={ShieldCheck}
-          title="Informação Legal"
-          description="Dados para termos, recibos, política de privacidade e identificação."
-        >
-          <Stack spacing={4}>
-            <Box>
-              <Label>Negócio registado?</Label>
-              <Select
-                placeholder="Selecione uma opção"
-                {...inputStyle}
-                onChange={(e) => handleChange("registered", e.target.value)}
-              >
-                <option value="sim">Sim</option>
-                <option value="nao">Não</option>
-              </Select>
-            </Box>
-
-            {form.registered === "sim" && (
-              <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
-                <Box>
-                  <Label>Nome da empresa</Label>
-                  <Input
-                    placeholder="Nome legal da empresa"
-                    {...inputStyle}
-                    onChange={(e) => handleChange("companyName", e.target.value)}
-                  />
-                </Box>
-
-                <Box>
-                  <Label>NUIT</Label>
-                  <Input
-                    placeholder="NUIT da empresa"
-                    {...inputStyle}
-                    onChange={(e) => handleChange("nuit", e.target.value)}
-                  />
-                </Box>
-              </Grid>
-            )}
-
-            {form.registered === "nao" && (
-              <Stack spacing={4}>
-                <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
-                  <Box>
-                    <Label>Nome</Label>
-                    <Input
-                      placeholder="Nome"
-                      {...inputStyle}
-                      onChange={(e) => handleChange("legalFirstName", e.target.value)}
-                    />
-                  </Box>
-
-                  <Box>
-                    <Label>Apelido</Label>
-                    <Input
-                      placeholder="Apelido"
-                      {...inputStyle}
-                      onChange={(e) => handleChange("legalLastName", e.target.value)}
-                    />
-                  </Box>
-                </Grid>
-
-                <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
-                  <Box>
-                    <Label>Data de nascimento</Label>
-                    <Input
-                      type="date"
-                      {...inputStyle}
-                      onChange={(e) => handleChange("birthDate", e.target.value)}
-                    />
-                  </Box>
-
-                  <Box>
-                    <Label>BI / Passaporte</Label>
-                    <Input
-                      placeholder="Número de identificação"
-                      {...inputStyle}
-                      onChange={(e) => handleChange("documentNumber", e.target.value)}
-                    />
-                  </Box>
-                </Grid>
-              </Stack>
-            )}
-
-            <Box>
-              <Label>Observações legais</Label>
-              <Textarea
-                placeholder="Alguma informação importante para termos, políticas ou identificação?"
-                {...inputStyle}
-                onChange={(e) => handleChange("legalNotes", e.target.value)}
-              />
-            </Box>
-          </Stack>
-        </Section>
-
-        <Section
-          icon={LayoutTemplate}
-          title="Protótipo e Plano"
-          description="Escolha o modelo e o plano que pretende usar."
-        >
+        <Section icon={LayoutTemplate} title="Protótipo e Plano">
           <Stack spacing={6}>
             <Box>
               <Label>Escolha o protótipo</Label>
               <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
                 {prototypes.map((prototype) => {
                   const active = form.selectedPrototype === prototype.name;
-
                   return (
                     <Box
                       key={prototype.name}
@@ -743,12 +598,7 @@ const QuestionnairePage = () => {
                       border={`1px solid ${active ? primaryColor : borderColor}`}
                       cursor="pointer"
                       bg={active ? "blue.50" : "white"}
-                      boxShadow={
-                        active ? "0px 10px 25px rgba(37,99,235,0.18)" : "none"
-                      }
-                      onClick={() =>
-                        handleChange("selectedPrototype", prototype.name)
-                      }
+                      onClick={() => handleChange("selectedPrototype", prototype.name)}
                     >
                       <Heading size="sm">{prototype.name}</Heading>
                       <Text fontSize="sm" color={greyColor} mt={1}>
@@ -765,7 +615,6 @@ const QuestionnairePage = () => {
               <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
                 {plans.map((plan) => {
                   const active = form.selectedPlan === plan.name;
-
                   return (
                     <Box
                       key={plan.name}
@@ -774,24 +623,12 @@ const QuestionnairePage = () => {
                       border={`1px solid ${active ? primaryColor : borderColor}`}
                       cursor="pointer"
                       bg={active ? "blue.50" : "white"}
-                      boxShadow={
-                        active ? "0px 10px 25px rgba(37,99,235,0.18)" : "none"
-                      }
                       onClick={() => handleChange("selectedPlan", plan.name)}
                     >
-                      {plan.popular && (
-                        <Badge colorScheme="blue" mb={2}>
-                          Mais Popular
-                        </Badge>
-                      )}
-
+                      {plan.popular && <Badge colorScheme="blue" mb={2}>Mais Popular</Badge>}
                       <Heading size="md">{plan.name}</Heading>
-                      <Text fontWeight="bold" mt={1}>
-                        {plan.price}
-                      </Text>
-                      <Text fontSize="sm" color={greyColor} mt={1}>
-                        {plan.desc}
-                      </Text>
+                      <Text fontWeight="bold" mt={1}>{plan.price}</Text>
+                      <Text fontSize="sm" color={greyColor} mt={1}>{plan.desc}</Text>
                     </Box>
                   );
                 })}
@@ -800,53 +637,10 @@ const QuestionnairePage = () => {
           </Stack>
         </Section>
 
-        <Section
-          icon={Calendar}
-          title="Prazo e Observações Finais"
-          description="Quando pretende lançar e quais detalhes finais devemos considerar?"
-        >
+        <Section icon={Calendar} title="Prazo e Observações Finais">
           <Stack spacing={4}>
-            <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
-              <Box>
-                <Label>Data desejada para lançamento</Label>
-                <Input
-                  type="date"
-                  {...inputStyle}
-                  onChange={(e) => handleChange("launchDate", e.target.value)}
-                />
-              </Box>
-
-              <Box>
-                <Label>Urgência</Label>
-                <Select
-                  placeholder="Selecione uma opção"
-                  {...inputStyle}
-                  onChange={(e) => handleChange("urgency", e.target.value)}
-                >
-                  <option value="normal">Normal</option>
-                  <option value="urgente">Urgente</option>
-                  <option value="sem-pressa">Sem pressa</option>
-                </Select>
-              </Box>
-            </Grid>
-
-            <Flex align="center" gap={2}>
-              <Icon as={Info} color={primaryColor} />
-              <Text fontSize="sm" color={greyColor}>
-                Normalmente levamos 2–3 dias para personalizar a loja após
-                recebermos todas as informações.
-              </Text>
-            </Flex>
-
-            <Box>
-              <Label>Observações finais</Label>
-              <Textarea
-                placeholder="Algum pedido especial, referência visual, concorrente, funcionalidade extra ou detalhe importante?"
-                {...inputStyle}
-                minH="120px"
-                onChange={(e) => handleChange("finalNotes", e.target.value)}
-              />
-            </Box>
+            <Input type="date" {...inputStyle} onChange={(e) => handleChange("launchDate", e.target.value)} />
+            <Textarea placeholder="Observações finais" {...inputStyle} onChange={(e) => handleChange("finalNotes", e.target.value)} />
           </Stack>
         </Section>
 
@@ -856,12 +650,10 @@ const QuestionnairePage = () => {
           size="lg"
           borderRadius="xl"
           py={7}
-          _hover={{ opacity: 0.9, transform: "translateY(-2px)" }}
-          boxShadow="0px 10px 25px rgba(37,99,235,0.3)"
-          transition="all 0.2s ease"
-          onClick={handleSubmit}
+          onClick={handleSubmitRequest}
+          _hover={{ opacity: 0.9 }}
         >
-          Enviar Questionário
+          Submeter pedido
         </Button>
       </Flex>
     </Flex>
