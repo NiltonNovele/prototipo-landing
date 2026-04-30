@@ -190,7 +190,7 @@ const prototypes: Prototype[] = [
     description:
       "Loja feita à medida, com design e funcionalidades adaptadas ao seu negócio.",
     media: "/6.jpg",
-    price: "A partir de 10,000MZN",
+    price: "A partir de 5,000MZN",
     purpose:
       "Criar uma loja personalizada para necessidades específicas, sem limitações de estrutura.",
     details:

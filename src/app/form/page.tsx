@@ -36,7 +36,7 @@ import {
 import { FaWhatsapp } from "react-icons/fa";
 
 const API_BASE_URL = "https://ejem-donations.onrender.com";
-const WHATSAPP_NUMBER = "258847529665"; // replace with your real number
+const WHATSAPP_NUMBER = "258847529665"; 
 
 const primaryColor = "#2563EB";
 const darkColor = "#0F172A";
@@ -213,21 +213,16 @@ const QuestionnairePage = () => {
 
       const payload = {
         donorName: form.ownerName,
-        donorContact: form.whatsapp,
-        anonymousDonation: false,
-        amount: selectedPlanData.amount,
-        paymentMethod: form.paymentMethod,
-        donationMode: "money",
-        selectedGoods: [],
-        otherDonation: "",
-        deliveryMethod: "",
-        message: JSON.stringify({
-          type: "Loja.Sale Store Request",
-          storeName: form.storeName,
-          selectedPlan: form.selectedPlan,
-          selectedPrototype: form.selectedPrototype,
-          questionnaire: form,
-        }),
+  donorContact: form.whatsapp,
+  anonymousDonation: false,
+  amount: selectedPlanData.amount,
+  paymentMethod: form.paymentMethod,
+  donationMode: "money",
+  selectedGoods: [],
+  otherDonation: "",
+  deliveryMethod: "",
+  returnUrl: `${window.location.origin}/form?payment=success`,
+  message: "Finalize a sua compra e digitalize o seu negócio",
       };
 
       localStorage.setItem(
