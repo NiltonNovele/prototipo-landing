@@ -105,14 +105,14 @@ const plans = [
   {
     name: "Starter",
     price: "3 000 MZN + 500 MZN/mês",
-    amount: 1,
+    amount: 3000,
     desc: "Ideal para começar rapidamente com uma loja profissional.",
     popular: true,
   },
   {
     name: "Premium",
     price: "9 000 MZN + 1 500 MZN/mês",
-    amount: 1,
+    amount: 9000,
     desc: "Ideal para negócios que precisam de personalização avançada.",
   },
 ];
