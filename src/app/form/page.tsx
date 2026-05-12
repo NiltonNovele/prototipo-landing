@@ -23,12 +23,9 @@ import {
   Calendar,
   CreditCard,
   Globe,
-  Info,
   LayoutTemplate,
-  MessageCircle,
   Package,
   Palette,
-  ShieldCheck,
   Store,
   Truck,
   User,
@@ -36,7 +33,8 @@ import {
 import { FaWhatsapp } from "react-icons/fa";
 
 const API_BASE_URL = "https://ejem-donations.onrender.com";
-const WHATSAPP_NUMBER = "258847529665"; 
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/xojrbqpb";
+const WHATSAPP_NUMBER = "258847529665";
 
 const primaryColor = "#2563EB";
 const darkColor = "#0F172A";
@@ -157,7 +155,8 @@ const QuestionnairePage = () => {
     paymentMethod: "M-Pesa",
   });
 
-  const selectedPlanData = plans.find((p) => p.name === form.selectedPlan) || plans[0];
+  const selectedPlanData =
+    plans.find((plan) => plan.name === form.selectedPlan) || plans[0];
 
   const handleChange = (key: string, value: any) => {
     setForm((prev: any) => ({ ...prev, [key]: value }));
@@ -207,22 +206,74 @@ const QuestionnairePage = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const sendQuestionnaireToFormspree = async () => {
+    const response = await fetch(FORMSPREE_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        _subject: `Novo pedido Loja.Sale - ${form.storeName}`,
+        project: "Loja.Sale",
+        submittedAt: new Date().toISOString(),
+
+        storeName: form.storeName,
+        ownerName: form.ownerName,
+        whatsapp: form.whatsapp,
+        email: form.email || "",
+        city: form.city || "",
+
+        selectedPlan: form.selectedPlan,
+        selectedPrototype: form.selectedPrototype,
+        planPrice: selectedPlanData.price,
+        amount: selectedPlanData.amount,
+
+        businessTypes: (form.businessTypes || []).join(", "),
+        brandColors: (form.brandColors || []).join(", "),
+        productCategories: (form.productCategories || []).join(", "),
+        paymentMethods: (form.paymentMethods || []).join(", "),
+        deliveryMethods: (form.deliveryMethods || []).join(", "),
+
+        businessDescription: form.businessDescription || "",
+        logoLink: form.logoLink || "",
+        socialLinks: form.socialLinks || "",
+        brandStyle: form.brandStyle || "",
+        mainProducts: form.mainProducts || "",
+        productQuantity: form.productQuantity || "",
+        deliveryAreas: form.deliveryAreas || "",
+        domainStatus: form.domainStatus || "",
+        desiredDomain: form.desiredDomain || "",
+        launchDate: form.launchDate || "",
+        finalNotes: form.finalNotes || "",
+
+        fullQuestionnaire: JSON.stringify(form, null, 2),
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Não foi possível enviar os dados do questionário.");
+    }
+  };
+
   const handleFinalizePurchase = async () => {
     try {
       setIsPaying(true);
 
+      await sendQuestionnaireToFormspree();
+
       const payload = {
         donorName: form.ownerName,
-  donorContact: form.whatsapp,
-  anonymousDonation: false,
-  amount: selectedPlanData.amount,
-  paymentMethod: form.paymentMethod,
-  donationMode: "money",
-  selectedGoods: [],
-  otherDonation: "",
-  deliveryMethod: "",
-  returnUrl: `${window.location.origin}/form?payment=success`,
-  message: "Finalize a sua compra e digitalize o seu negócio",
+        donorContact: form.whatsapp,
+        anonymousDonation: false,
+        amount: selectedPlanData.amount,
+        paymentMethod: form.paymentMethod,
+        donationMode: "money",
+        selectedGoods: [],
+        otherDonation: "",
+        deliveryMethod: "",
+        returnUrl: `${window.location.origin}/success`,
+        message: "Finalize a sua compra e digitalize o seu negócio",
       };
 
       localStorage.setItem(
@@ -258,8 +309,10 @@ const QuestionnairePage = () => {
       setStep("success");
     } catch (error: any) {
       toast({
-        title: "Erro no pagamento",
-        description: error?.message || "Tente novamente.",
+        title: "Erro ao finalizar",
+        description:
+          error?.message ||
+          "Não foi possível enviar o pedido ou iniciar o pagamento.",
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -336,8 +389,6 @@ const QuestionnairePage = () => {
               <SummaryItem label="Email" value={form.email} />
               <SummaryItem label="Cidade" value={form.city} />
               <SummaryItem label="Tipo de negócio" value={form.businessTypes} />
-              <SummaryItem label="Loja física" value={form.hasPhysicalStore} />
-              <SummaryItem label="Tempo de existência" value={form.businessAge} />
               <SummaryItem label="Descrição do negócio" value={form.businessDescription} />
               <SummaryItem label="Cores preferidas" value={form.brandColors} />
               <SummaryItem label="Logo" value={form.logoLink} />
@@ -345,15 +396,12 @@ const QuestionnairePage = () => {
               <SummaryItem label="Estilo desejado" value={form.brandStyle} />
               <SummaryItem label="Produtos / serviços" value={form.mainProducts} />
               <SummaryItem label="Quantidade de produtos" value={form.productQuantity} />
-              <SummaryItem label="Fotos dos produtos" value={form.hasProductPhotos} />
               <SummaryItem label="Categorias" value={form.productCategories} />
               <SummaryItem label="Pagamentos" value={form.paymentMethods} />
               <SummaryItem label="Entregas" value={form.deliveryMethods} />
               <SummaryItem label="Zonas de entrega" value={form.deliveryAreas} />
-              <SummaryItem label="Receber pedidos via" value={form.orderMethod} />
               <SummaryItem label="Domínio" value={form.domainStatus} />
               <SummaryItem label="Domínio desejado" value={form.desiredDomain} />
-              <SummaryItem label="Negócio registado" value={form.registered} />
               <SummaryItem label="Protótipo" value={form.selectedPrototype} />
               <SummaryItem label="Plano" value={form.selectedPlan} />
               <SummaryItem label="Lançamento" value={form.launchDate} />
@@ -406,7 +454,7 @@ const QuestionnairePage = () => {
                   rounded="xl"
                   flex={1}
                   isLoading={isPaying}
-                  loadingText="A iniciar pagamento"
+                  loadingText="A enviar pedido"
                   onClick={handleFinalizePurchase}
                   _hover={{ opacity: 0.9 }}
                 >
@@ -443,22 +491,41 @@ const QuestionnairePage = () => {
             <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
               <Box>
                 <Label>Nome completo *</Label>
-                <Input {...inputStyle} onChange={(e) => handleChange("ownerName", e.target.value)} />
+                <Input
+                  {...inputStyle}
+                  value={form.ownerName || ""}
+                  onChange={(e) => handleChange("ownerName", e.target.value)}
+                />
               </Box>
+
               <Box>
                 <Label>WhatsApp *</Label>
-                <Input {...inputStyle} onChange={(e) => handleChange("whatsapp", e.target.value)} />
+                <Input
+                  {...inputStyle}
+                  value={form.whatsapp || ""}
+                  onChange={(e) => handleChange("whatsapp", e.target.value)}
+                />
               </Box>
             </Grid>
 
             <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
               <Box>
                 <Label>Email</Label>
-                <Input type="email" {...inputStyle} onChange={(e) => handleChange("email", e.target.value)} />
+                <Input
+                  type="email"
+                  {...inputStyle}
+                  value={form.email || ""}
+                  onChange={(e) => handleChange("email", e.target.value)}
+                />
               </Box>
+
               <Box>
                 <Label>Cidade</Label>
-                <Input {...inputStyle} onChange={(e) => handleChange("city", e.target.value)} />
+                <Input
+                  {...inputStyle}
+                  value={form.city || ""}
+                  onChange={(e) => handleChange("city", e.target.value)}
+                />
               </Box>
             </Grid>
           </Stack>
@@ -468,12 +535,19 @@ const QuestionnairePage = () => {
           <Stack spacing={4}>
             <Box>
               <Label>Nome da loja *</Label>
-              <Input {...inputStyle} onChange={(e) => handleChange("storeName", e.target.value)} />
+              <Input
+                {...inputStyle}
+                value={form.storeName || ""}
+                onChange={(e) => handleChange("storeName", e.target.value)}
+              />
             </Box>
 
             <Box>
               <Label>Tipo de negócio</Label>
-              <CheckboxGroup onChange={(value) => handleChange("businessTypes", value)}>
+              <CheckboxGroup
+                value={form.businessTypes}
+                onChange={(value) => handleChange("businessTypes", value)}
+              >
                 <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={3}>
                   <Checkbox value="moda">Moda</Checkbox>
                   <Checkbox value="eletronicos">Eletrónica</Checkbox>
@@ -491,6 +565,7 @@ const QuestionnairePage = () => {
             <Textarea
               placeholder="Descreva brevemente o seu negócio"
               {...inputStyle}
+              value={form.businessDescription || ""}
               onChange={(e) => handleChange("businessDescription", e.target.value)}
             />
           </Stack>
@@ -498,7 +573,10 @@ const QuestionnairePage = () => {
 
         <Section icon={Palette} title="Identidade Visual">
           <Stack spacing={4}>
-            <CheckboxGroup onChange={(value) => handleChange("brandColors", value)}>
+            <CheckboxGroup
+              value={form.brandColors}
+              onChange={(value) => handleChange("brandColors", value)}
+            >
               <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={3}>
                 <Checkbox value="azul">Azul</Checkbox>
                 <Checkbox value="preto-dourado">Preto & Dourado</Checkbox>
@@ -509,24 +587,54 @@ const QuestionnairePage = () => {
               </Grid>
             </CheckboxGroup>
 
-            <Input placeholder="Link do logotipo" {...inputStyle} onChange={(e) => handleChange("logoLink", e.target.value)} />
-            <Input placeholder="Instagram / Facebook / Website" {...inputStyle} onChange={(e) => handleChange("socialLinks", e.target.value)} />
-            <Textarea placeholder="Estilo desejado" {...inputStyle} onChange={(e) => handleChange("brandStyle", e.target.value)} />
+            <Input
+              placeholder="Link do logotipo"
+              {...inputStyle}
+              value={form.logoLink || ""}
+              onChange={(e) => handleChange("logoLink", e.target.value)}
+            />
+
+            <Input
+              placeholder="Instagram / Facebook / Website"
+              {...inputStyle}
+              value={form.socialLinks || ""}
+              onChange={(e) => handleChange("socialLinks", e.target.value)}
+            />
+
+            <Textarea
+              placeholder="Estilo desejado"
+              {...inputStyle}
+              value={form.brandStyle || ""}
+              onChange={(e) => handleChange("brandStyle", e.target.value)}
+            />
           </Stack>
         </Section>
 
         <Section icon={Package} title="Produtos e Catálogo">
           <Stack spacing={4}>
-            <Textarea placeholder="Principais produtos ou serviços" {...inputStyle} onChange={(e) => handleChange("mainProducts", e.target.value)} />
+            <Textarea
+              placeholder="Principais produtos ou serviços"
+              {...inputStyle}
+              value={form.mainProducts || ""}
+              onChange={(e) => handleChange("mainProducts", e.target.value)}
+            />
 
-            <Select placeholder="Quantidade inicial de produtos" {...inputStyle} onChange={(e) => handleChange("productQuantity", e.target.value)}>
+            <Select
+              placeholder="Quantidade inicial de produtos"
+              {...inputStyle}
+              value={form.productQuantity || ""}
+              onChange={(e) => handleChange("productQuantity", e.target.value)}
+            >
               <option value="1-20">1–20</option>
               <option value="20-50">20–50</option>
               <option value="50-100">50–100</option>
               <option value="100-mais">100+</option>
             </Select>
 
-            <CheckboxGroup onChange={(value) => handleChange("productCategories", value)}>
+            <CheckboxGroup
+              value={form.productCategories}
+              onChange={(value) => handleChange("productCategories", value)}
+            >
               <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={3}>
                 {productOptions.map((option) => (
                   <Checkbox key={option} value={option}>
@@ -539,7 +647,10 @@ const QuestionnairePage = () => {
         </Section>
 
         <Section icon={CreditCard} title="Pagamentos">
-          <CheckboxGroup onChange={(value) => handleChange("paymentMethods", value)}>
+          <CheckboxGroup
+            value={form.paymentMethods}
+            onChange={(value) => handleChange("paymentMethods", value)}
+          >
             <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={3}>
               <Checkbox value="mpesa">M-Pesa</Checkbox>
               <Checkbox value="emola">e-Mola</Checkbox>
@@ -553,7 +664,10 @@ const QuestionnairePage = () => {
 
         <Section icon={Truck} title="Entregas e Recolha">
           <Stack spacing={4}>
-            <CheckboxGroup onChange={(value) => handleChange("deliveryMethods", value)}>
+            <CheckboxGroup
+              value={form.deliveryMethods}
+              onChange={(value) => handleChange("deliveryMethods", value)}
+            >
               <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={3}>
                 <Checkbox value="retirada">Retirada na loja</Checkbox>
                 <Checkbox value="delivery">Delivery</Checkbox>
@@ -562,19 +676,34 @@ const QuestionnairePage = () => {
               </Grid>
             </CheckboxGroup>
 
-            <Input placeholder="Zonas de entrega" {...inputStyle} onChange={(e) => handleChange("deliveryAreas", e.target.value)} />
+            <Input
+              placeholder="Zonas de entrega"
+              {...inputStyle}
+              value={form.deliveryAreas || ""}
+              onChange={(e) => handleChange("deliveryAreas", e.target.value)}
+            />
           </Stack>
         </Section>
 
         <Section icon={Globe} title="Configuração Técnica">
           <Stack spacing={4}>
-            <Select placeholder="Domínio" {...inputStyle} onChange={(e) => handleChange("domainStatus", e.target.value)}>
+            <Select
+              placeholder="Domínio"
+              {...inputStyle}
+              value={form.domainStatus || ""}
+              onChange={(e) => handleChange("domainStatus", e.target.value)}
+            >
               <option value="tenho">Já tenho domínio</option>
               <option value="preciso">Preciso de ajuda</option>
               <option value="subdominio">Quero começar com subdomínio</option>
             </Select>
 
-            <Input placeholder="Nome de domínio desejado" {...inputStyle} onChange={(e) => handleChange("desiredDomain", e.target.value)} />
+            <Input
+              placeholder="Nome de domínio desejado"
+              {...inputStyle}
+              value={form.desiredDomain || ""}
+              onChange={(e) => handleChange("desiredDomain", e.target.value)}
+            />
           </Stack>
         </Section>
 
@@ -585,6 +714,7 @@ const QuestionnairePage = () => {
               <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
                 {prototypes.map((prototype) => {
                   const active = form.selectedPrototype === prototype.name;
+
                   return (
                     <Box
                       key={prototype.name}
@@ -610,6 +740,7 @@ const QuestionnairePage = () => {
               <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
                 {plans.map((plan) => {
                   const active = form.selectedPlan === plan.name;
+
                   return (
                     <Box
                       key={plan.name}
@@ -620,10 +751,18 @@ const QuestionnairePage = () => {
                       bg={active ? "blue.50" : "white"}
                       onClick={() => handleChange("selectedPlan", plan.name)}
                     >
-                      {plan.popular && <Badge colorScheme="blue" mb={2}>Mais Popular</Badge>}
+                      {plan.popular && (
+                        <Badge colorScheme="blue" mb={2}>
+                          Mais Popular
+                        </Badge>
+                      )}
                       <Heading size="md">{plan.name}</Heading>
-                      <Text fontWeight="bold" mt={1}>{plan.price}</Text>
-                      <Text fontSize="sm" color={greyColor} mt={1}>{plan.desc}</Text>
+                      <Text fontWeight="bold" mt={1}>
+                        {plan.price}
+                      </Text>
+                      <Text fontSize="sm" color={greyColor} mt={1}>
+                        {plan.desc}
+                      </Text>
                     </Box>
                   );
                 })}
@@ -634,8 +773,19 @@ const QuestionnairePage = () => {
 
         <Section icon={Calendar} title="Prazo e Observações Finais">
           <Stack spacing={4}>
-            <Input type="date" {...inputStyle} onChange={(e) => handleChange("launchDate", e.target.value)} />
-            <Textarea placeholder="Observações finais" {...inputStyle} onChange={(e) => handleChange("finalNotes", e.target.value)} />
+            <Input
+              type="date"
+              {...inputStyle}
+              value={form.launchDate || ""}
+              onChange={(e) => handleChange("launchDate", e.target.value)}
+            />
+
+            <Textarea
+              placeholder="Observações finais"
+              {...inputStyle}
+              value={form.finalNotes || ""}
+              onChange={(e) => handleChange("finalNotes", e.target.value)}
+            />
           </Stack>
         </Section>
 
